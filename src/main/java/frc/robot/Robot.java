@@ -11,12 +11,17 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.DriveConstants;
+
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.NoSuchElementException;
 import org.littletonrobotics.junction.*;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.*;
+
+// import com.ctre.phoenix.sensors.Pigeon2;
+import com.ctre.phoenix6.hardware.Pigeon2;
 
 public class Robot extends LoggedRobot {
 
@@ -25,6 +30,10 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  
+  public final Pigeon2 pigeon;
+  
+  int _loopCount = 0;
 
   @SuppressWarnings("resource") // Ignore not closing PowerDistribution instance
   public Robot() {
@@ -66,6 +75,7 @@ public class Robot extends LoggedRobot {
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
     m_robotContainer = new RobotContainer();
+    pigeon = new Pigeon2(0, "rio");
 
     // Used to track usage of Kitbot code, please do not remove.
     HAL.report(tResourceType.kResourceType_Framework, 10);
@@ -125,7 +135,14 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    if(_loopCount++ > Constants.DriveConstants.LOOPCOUNT)
+    {
+      _loopCount = 0;
+      double yaw = pigeon.getYaw().getValueAsDouble();
+      System.out.println("Heading is " + yaw);
+    }
+  }
 
   @Override
   public void testInit() {
