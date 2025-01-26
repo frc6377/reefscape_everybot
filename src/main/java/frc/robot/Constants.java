@@ -24,6 +24,22 @@ public final class Constants {
 
     public static final int LEFT_DRIVE_ENCODER_A = 5;
     public static final int LEFT_DRIVE_ENCODER_B = 6;
+
+    public static final int PIGEON_DEVICE_ID = 0;
+
+    public static final double TRACK_WIDTH_METERS = 0.57785;
+
+    public static final double GEARING = 10.71;
+
+    public static final double WHEEL_DIAMETER_METERS = 0.1524;
+
+    // COMPLETELY NOT SURE OF MOI
+    public static final double MOI = 5.5;
+
+    // MASS WITHOUT WIRING
+    public static final double MASS_KILOGRAMS = 25.93153918200222;
+
+    public static final double ENCODER_RESOLUTION = 8192;
   }
 
   public static final class RollerConstants {

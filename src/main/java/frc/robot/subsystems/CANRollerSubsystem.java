@@ -47,12 +47,8 @@ public class CANRollerSubsystem extends SubsystemBase {
   }
 
   // Scoring method
-  public Command ejectCommand(boolean triggerPressed) {
-    if (triggerPressed) {
-      return runRollerCommand(RollerConstants.ROLLER_EJECT_PERCENT);
-    } else {
-      return stopRoller();
-    }
+  public Command ejectCommand() {
+    return runRollerCommand(RollerConstants.ROLLER_EJECT_PERCENT);
   }
 
   public Command intakeCommand() {
