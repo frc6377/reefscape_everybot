@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Robot;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 import utilities.DebugEntry;
@@ -190,17 +191,20 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
+
     diffDrive.arcadeDrive(relativeSpeeds.vyMetersPerSecond, relativeSpeeds.omegaRadiansPerSecond);
   }
 
   @Override
   public void periodic() {
     // Update position using odometry
-    position =
-        driveOdometry.update(
-            gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
+    if (Robot.isReal()) {
+      position =
+          driveOdometry.update(
+              gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
-    wheelSpeeds = new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
+      wheelSpeeds = new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
+    }
 
     SmartDashboard.putNumber("LEFT ENCODER RATE", leftEncoder.getRate());
     SmartDashboard.putNumber("RIGHT ENCODER RATE", rightEncoder.getRate());
@@ -225,22 +229,33 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     // Update the simulation state
     diffDriveSim.update(0.02); // Update at 20ms intervals
+    Logger.recordOutput("SimPose", diffDriveSim.getPose());
 
     // Update encoder and gyro states for simulation
     leftEncoderSim.setDistance(
         diffDriveSim.getLeftPositionMeters()); // Set distance from simulation
     leftEncoderSim.setRate(
         diffDriveSim.getLeftVelocityMetersPerSecond()); // Set rate from simulation
+
+    SmartDashboard.putNumber("LeftEncoderSimSpeed", leftEncoderSim.getRate());
+
     rightEncoderSim.setDistance(
         diffDriveSim.getRightPositionMeters()); // Set distance from simulation
     rightEncoderSim.setRate(
         diffDriveSim.getRightVelocityMetersPerSecond()); // Set rate from simulation
+
+    SmartDashboard.putNumber("RightEncoderSimSpeed", rightEncoderSim.getRate());
+
     gyroSim.setRawYaw(diffDriveSim.getHeading().getDegrees()); // Update simulated gyro
     Logger.recordOutput("Robot Position", driveOdometry.getPoseMeters());
 
+    wheelSpeeds =
+        new DifferentialDriveWheelSpeeds(leftEncoderSim.getRate(), rightEncoderSim.getRate());
+
     // Update odometry in simulation
-    driveOdometry.update(
-        gyro.getRotation2d(), leftEncoderSim.getDistance(), rightEncoderSim.getDistance());
+    position =
+        driveOdometry.update(
+            gyro.getRotation2d(), leftEncoderSim.getDistance(), rightEncoderSim.getDistance());
   }
 
   // Telemetry Commands
