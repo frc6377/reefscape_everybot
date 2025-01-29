@@ -49,6 +49,9 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   private Pose2d position;
 
+  private double LeftSimMotorOutput;
+  private double RightSimMotorOutput;
+
   private DifferentialDriveWheelSpeeds wheelSpeeds;
 
   private double leftEncoderRate = 0;
@@ -147,12 +150,12 @@ public class CANDriveSubsystem extends SubsystemBase {
         this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
         // pose)
         this::getCurrentSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        (speeds, feedforwards) ->
+        (speeds) ->
             driveRobotRelative(
                 speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds.
         // Also optionally outputs individual module feedforwards
         new PPLTVController(
-            0.02), // PPLTVController is the built in path following controller for differential
+            0.04), // PPLTVController is the built in path following controller for differential
         // drive trains
         config, // The robot configuration
         () -> {
@@ -174,11 +177,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   public void resetOdometry(Pose2d resetPose) {
     leftEncoderSim.resetData();
     rightEncoderSim.resetData(); // Reset encoder values
-    driveOdometry.resetPosition(
-        gyro.getRotation2d(),
-        leftEncoderSim.getDistance(),
-        rightEncoderSim.getDistance(),
-        resetPose);
+    driveOdometry.resetPose(resetPose);
   }
 
   public Pose2d getPosition() {
@@ -191,8 +190,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
-
-    diffDrive.arcadeDrive(relativeSpeeds.vyMetersPerSecond, relativeSpeeds.omegaRadiansPerSecond);
+    diffDrive.arcadeDrive(relativeSpeeds.vxMetersPerSecond, relativeSpeeds.omegaRadiansPerSecond);
   }
 
   @Override
@@ -205,9 +203,6 @@ public class CANDriveSubsystem extends SubsystemBase {
 
       wheelSpeeds = new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
     }
-
-    SmartDashboard.putNumber("LEFT ENCODER RATE", leftEncoder.getRate());
-    SmartDashboard.putNumber("RIGHT ENCODER RATE", rightEncoder.getRate());
 
     field.setRobotPose(position);
 
@@ -225,6 +220,13 @@ public class CANDriveSubsystem extends SubsystemBase {
     // Simulate the motor inputs to the drivetrain
     diffDriveSim.setInputs(
         leftLeader.getMotorOutputPercent() * RobotController.getInputVoltage(),
+        rightLeader.getMotorOutputPercent() * RobotController.getInputVoltage());
+
+    SmartDashboard.putNumber(
+        "leftSimMotorInput",
+        leftLeader.getMotorOutputPercent() * RobotController.getInputVoltage());
+    SmartDashboard.putNumber(
+        "rightSimMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getInputVoltage());
 
     // Update the simulation state
