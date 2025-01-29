@@ -28,6 +28,9 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightLeader = new VictorSPX(DriveConstants.RIGHT_LEADER_ID);
     rightFollower = new VictorSPX(DriveConstants.RIGHT_FOLLOWER_ID);
 
+    leftFollower.follow(leftLeader);
+    rightFollower.follow(rightLeader);
+
     rightLeader.setInverted(false);
     rightFollower.setInverted(InvertType.FollowMaster);
 
