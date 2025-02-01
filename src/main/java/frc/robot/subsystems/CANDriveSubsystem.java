@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -79,6 +80,9 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   RobotConfig config;
 
+  ModuleConfig leftModuleConfig;
+  ModuleConfig rightModuleConfig;
+
   public CANDriveSubsystem() {
     field = new Field2d();
 
@@ -112,6 +116,24 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     kinematics = new DifferentialDriveKinematics(DriveConstants.TRACK_WIDTH_METERS);
 
+    leftModuleConfig =
+        new ModuleConfig(
+            DriveConstants.WHEEL_DIAMETER_METERS,
+            DriveConstants.MAX_DRIVE_VELOCITY_MPS,
+            DriveConstants.WHEEL_COF,
+            DCMotor.getCIM(2),
+            DriveConstants.MOTOR_CURRENT_LIMIT,
+            2);
+
+    rightModuleConfig =
+        new ModuleConfig(
+            DriveConstants.WHEEL_DIAMETER_METERS,
+            DriveConstants.MAX_DRIVE_VELOCITY_MPS,
+            DriveConstants.WHEEL_COF,
+            DCMotor.getCIM(2),
+            DriveConstants.MOTOR_CURRENT_LIMIT,
+            2);
+
     diffDrive =
         new DifferentialDrive(
             (speed) -> leftLeader.set(ControlMode.PercentOutput, speed),
@@ -138,7 +160,12 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public void defaultPathPlannerSetup() {
     try {
-      config = RobotConfig.fromGUISettings();
+      config =
+          new RobotConfig(
+              DriveConstants.MASS_KILOGRAMS,
+              DriveConstants.MOI,
+              leftModuleConfig,
+              DriveConstants.TRACK_WIDTH_METERS);
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
