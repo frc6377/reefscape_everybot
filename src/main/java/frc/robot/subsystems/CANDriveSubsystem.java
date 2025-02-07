@@ -50,9 +50,6 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   private Pose2d position;
 
-  private double LeftSimMotorOutput;
-  private double RightSimMotorOutput;
-
   private DifferentialDriveWheelSpeeds wheelSpeeds;
 
   private double leftEncoderRate = 0;
@@ -80,8 +77,7 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   RobotConfig config;
 
-  ModuleConfig leftModuleConfig;
-  ModuleConfig rightModuleConfig;
+  ModuleConfig driveModuleConfig;
 
   public CANDriveSubsystem() {
     field = new Field2d();
@@ -116,21 +112,12 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     kinematics = new DifferentialDriveKinematics(DriveConstants.TRACK_WIDTH_METERS);
 
-    leftModuleConfig =
+    driveModuleConfig =
         new ModuleConfig(
-            DriveConstants.WHEEL_DIAMETER_METERS,
+            DriveConstants.WHEEL_DIAMETER_METERS / 2,
             DriveConstants.MAX_DRIVE_VELOCITY_MPS,
             DriveConstants.WHEEL_COF,
-            DCMotor.getCIM(2),
-            DriveConstants.MOTOR_CURRENT_LIMIT,
-            2);
-
-    rightModuleConfig =
-        new ModuleConfig(
-            DriveConstants.WHEEL_DIAMETER_METERS,
-            DriveConstants.MAX_DRIVE_VELOCITY_MPS,
-            DriveConstants.WHEEL_COF,
-            DCMotor.getCIM(2),
+            DCMotor.getCIM(2).withReduction(DriveConstants.GEARING),
             DriveConstants.MOTOR_CURRENT_LIMIT,
             2);
 
@@ -164,8 +151,9 @@ public class CANDriveSubsystem extends SubsystemBase {
           new RobotConfig(
               DriveConstants.MASS_KILOGRAMS,
               DriveConstants.MOI,
-              leftModuleConfig,
+              driveModuleConfig,
               DriveConstants.TRACK_WIDTH_METERS);
+              
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
@@ -182,7 +170,7 @@ public class CANDriveSubsystem extends SubsystemBase {
                 speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds.
         // Also optionally outputs individual module feedforwards
         new PPLTVController(
-            0.04), // PPLTVController is the built in path following controller for differential
+            0.02), // PPLTVController is the built in path following controller for differential
         // drive trains
         config, // The robot configuration
         () -> {

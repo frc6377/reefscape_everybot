@@ -31,22 +31,16 @@ public final class Constants {
 
     public static final double GEARING = 10.71;
 
-    public static final double WHEEL_DIAMETER_METERS =
-        0.1524; // FIXME: ADD CORRECT NUMBER DO THIS BEFORE DRIVING OR ROBOT GO KABOOM
+    public static final double WHEEL_DIAMETER_METERS = 0.1524;
 
-    public static final double MAX_DRIVE_VELOCITY_MPS =
-        12; // FIXME: ADD CORRECT NUMBER DO THIS BEFORE DRIVING OR ROBOT GO KABOOM
+    public static final double MAX_DRIVE_VELOCITY_MPS = 4.5;
 
-    public static final double WHEEL_COF =
-        1.0; // FIXME: ADD CORRECT NUMBER DO THIS BEFORE DRIVING OR ROBOT GO KABOOM
+    public static final double WHEEL_COF = 0.95;
 
-    public static final double MOTOR_CURRENT_LIMIT =
-        100000000; // FIXME: ADD CORRECT NUMBER DO THIS BEFORE DRIVING OR ROBOT GO KABOOM
+    public static final double MOTOR_CURRENT_LIMIT = 40;
 
-    // COMPLETELY NOT SURE OF MOI
-    public static final double MOI = 5.5;
+    public static final double MOI = 7.0986919264;
 
-    // MASS WITHOUT WIRING
     public static final double MASS_KILOGRAMS = 25.93153918200222;
 
     public static final double ENCODER_RESOLUTION = 8192;
