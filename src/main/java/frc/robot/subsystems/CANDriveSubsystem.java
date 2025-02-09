@@ -1,5 +1,11 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -28,13 +34,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 import utilities.DebugEntry;
@@ -103,15 +102,20 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightFollower = new VictorSPX(DriveConstants.RIGHT_FOLLOWER_ID);
 
     leftEncoder =
-        new Encoder(DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, true);
+        new Encoder(
+            DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, false);
     rightEncoder =
         new Encoder(
-            DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, false);
+            DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, true);
 
     leftEncoder.setDistancePerPulse(
-        Math.PI * DriveConstants.WHEEL_DIAMETER_METERS.in(Meter) / DriveConstants.ENCODER_RESOLUTION);
+        Math.PI
+            * DriveConstants.WHEEL_DIAMETER_METERS.in(Meter)
+            / DriveConstants.ENCODER_RESOLUTION);
     rightEncoder.setDistancePerPulse(
-        Math.PI * DriveConstants.WHEEL_DIAMETER_METERS.in(Meter) / DriveConstants.ENCODER_RESOLUTION);
+        Math.PI
+            * DriveConstants.WHEEL_DIAMETER_METERS.in(Meter)
+            / DriveConstants.ENCODER_RESOLUTION);
 
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
@@ -225,20 +229,19 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
     diffDrive.arcadeDrive(
-        relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
+        relativeSpeeds.vxMetersPerSecond
+            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
         relativeSpeeds.omegaRadiansPerSecond);
 
     SmartDashboard.putNumber(
-        "ForwardInput", relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond));
+        "ForwardInput",
+        relativeSpeeds.vxMetersPerSecond
+            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond));
     SmartDashboard.putNumber("PathPlannerForwardInput", relativeSpeeds.vxMetersPerSecond);
   }
 
   @Override
   public void periodic() {
-
-    position =
-        driveOdometry.update(
-            gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
     wheelSpeeds = new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
     wheelSpeeds.desaturate(DriveConstants.MAX_DRIVE_VELOCITY_MPS);
@@ -251,8 +254,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightEncoderEntry.log(rightEncoderRate);
     gyroHeadingEntry.log(gyroHeading);
 
-    leftEncoderRevoEntry.log((double) leftEncoder.getRaw() / 8192);
-    rightEncoderRevoEntry.log((double) rightEncoder.getRaw() / 8192);
+    leftEncoderRevoEntry.log((double) leftEncoder.getRaw() / 2048);
+    rightEncoderRevoEntry.log((double) rightEncoder.getRaw() / 2048);
 
     SmartDashboard.putNumber(
         "leftMotorInput", leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
@@ -260,7 +263,11 @@ public class CANDriveSubsystem extends SubsystemBase {
         "rightMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
 
-    Logger.recordOutput("Robot Position", driveOdometry.getPoseMeters());
+    position =
+        driveOdometry.update(
+            gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
+
+    Logger.recordOutput("Robot Position", position);
   }
 
   @Override
