@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
@@ -9,6 +10,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
+import com.revrobotics.AbsoluteEncoder;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -17,6 +20,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -55,6 +59,9 @@ public class CANDriveSubsystem extends SubsystemBase {
   private double leftEncoderRate = 0;
   private double rightEncoderRate = 0;
 
+  private double leftEncoderRevo;
+  private double rightEncoderRevo;
+
   private Rotation2d gyroHeading = new Rotation2d(0);
 
   // Simulation variables
@@ -69,6 +76,10 @@ public class CANDriveSubsystem extends SubsystemBase {
       new DebugEntry<Double>(rightEncoderRate, "Right Encoder Rate", this);
   private DebugEntry<Rotation2d> gyroHeadingEntry =
       new DebugEntry<Rotation2d>(gyroHeading, "Gyro Heading", this);
+  private DebugEntry<Double> leftEncoderRevoEntry =
+      new DebugEntry<Double>(leftEncoderRevo, "LeftEncoderRevolutions", this);
+  private DebugEntry<Double> rightEncoderRevoEntry =
+      new DebugEntry<Double>(rightEncoderRevo, "RightEncoderRevolutions", this);
 
   private Field2d field = new Field2d();
 
@@ -89,10 +100,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightFollower = new VictorSPX(DriveConstants.RIGHT_FOLLOWER_ID);
 
     leftEncoder =
-        new Encoder(DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B);
+        new Encoder(DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, true);
     rightEncoder =
-        new Encoder(DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B);
-
+        new Encoder(DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, false);
+    
     leftEncoder.setDistancePerPulse(
         Math.PI * DriveConstants.WHEEL_DIAMETER_METERS / DriveConstants.ENCODER_RESOLUTION);
     rightEncoder.setDistancePerPulse(
@@ -101,11 +112,17 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
 
-    rightLeader.setInverted(false);
+    rightLeader.setInverted(true);
     rightFollower.setInverted(InvertType.FollowMaster);
 
-    leftLeader.setInverted(true);
+    leftLeader.setInverted(false);
     leftFollower.setInverted(InvertType.FollowMaster);
+
+    leftLeader.setNeutralMode(NeutralMode.Brake);
+    rightLeader.setNeutralMode(NeutralMode.Brake);
+    leftFollower.setNeutralMode(NeutralMode.Brake);
+    rightFollower.setNeutralMode(NeutralMode.Brake);
+    
 
     gyro = new Pigeon2(DriveConstants.PIGEON_DEVICE_ID);
     gyroSim = new Pigeon2SimState(gyro);
@@ -153,7 +170,6 @@ public class CANDriveSubsystem extends SubsystemBase {
               DriveConstants.MOI,
               driveModuleConfig,
               DriveConstants.TRACK_WIDTH_METERS);
-              
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
@@ -205,7 +221,13 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
-    diffDrive.arcadeDrive(relativeSpeeds.vxMetersPerSecond, relativeSpeeds.omegaRadiansPerSecond);
+    diffDrive.arcadeDrive(
+        relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY_MPS,
+        relativeSpeeds.omegaRadiansPerSecond);
+
+    SmartDashboard.putNumber(
+        "Auto ForwardInput",
+        relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY_MPS);
   }
 
   @Override
@@ -217,9 +239,8 @@ public class CANDriveSubsystem extends SubsystemBase {
               gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
       wheelSpeeds = new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
+      wheelSpeeds.desaturate(DriveConstants.MAX_DRIVE_VELOCITY_MPS);
     }
-
-    field.setRobotPose(position);
 
     leftEncoderRate = leftEncoder.getRate();
     rightEncoderRate = rightEncoder.getRate();
@@ -228,21 +249,26 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftEncoderEntry.log(leftEncoderRate);
     rightEncoderEntry.log(rightEncoderRate);
     gyroHeadingEntry.log(gyroHeading);
+
+    leftEncoderRevoEntry.log((double) leftEncoder.getRaw()/8192);
+    rightEncoderRevoEntry.log((double) rightEncoder.getRaw()/8192);
   }
 
   @Override
   public void simulationPeriodic() {
     // Simulate the motor inputs to the drivetrain
     diffDriveSim.setInputs(
-        leftLeader.getMotorOutputPercent() * RobotController.getInputVoltage(),
-        rightLeader.getMotorOutputPercent() * RobotController.getInputVoltage());
+        leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage(),
+        rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
+
+    field.setRobotPose(position);
 
     SmartDashboard.putNumber(
         "leftSimMotorInput",
-        leftLeader.getMotorOutputPercent() * RobotController.getInputVoltage());
+        leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     SmartDashboard.putNumber(
         "rightSimMotorInput",
-        rightLeader.getMotorOutputPercent() * RobotController.getInputVoltage());
+        rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
 
     // Update the simulation state
     diffDriveSim.update(0.02); // Update at 20ms intervals
@@ -283,4 +309,6 @@ public class CANDriveSubsystem extends SubsystemBase {
   public Command stopRobotCommand() {
     return run(() -> diffDrive.arcadeDrive(0.0, 0.0));
   }
+
+  
 }

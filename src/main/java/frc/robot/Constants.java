@@ -27,21 +27,25 @@ public final class Constants {
 
     public static final int PIGEON_DEVICE_ID = 0;
 
-    public static final double TRACK_WIDTH_METERS = 0.57785;
+    public static final double TRACK_WIDTH_METERS = 0.5715;
 
-    public static final double GEARING = 10.71;
+    public static final double GEARING = 8.45;
 
-    public static final double WHEEL_DIAMETER_METERS = 0.1524;
+    public static final double WHEEL_DIAMETER_METERS = 0.15240;
 
     public static final double MAX_DRIVE_VELOCITY_MPS = 4.5;
+    // 1m has 2.75 with 4.5 | 3.5 with 3.87096
+    // 2m has 1.375 with 4.5
 
-    public static final double WHEEL_COF = 0.95;
+    public static final double WHEEL_COF = 0.975;
 
     public static final double MOTOR_CURRENT_LIMIT = 40;
 
+    ;
     public static final double MOI = 7.0986919264;
+    ;
 
-    public static final double MASS_KILOGRAMS = 25.93153918200222;
+    public static final double MASS_KILOGRAMS = 48.885739278871;
 
     public static final double ENCODER_RESOLUTION = 8192;
   }
