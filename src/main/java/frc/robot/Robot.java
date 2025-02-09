@@ -12,9 +12,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.NoSuchElementException;
-import org.littletonrobotics.junction.*;
+import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.*;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
 
@@ -22,7 +26,7 @@ public class Robot extends LoggedRobot {
 
   private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  private RobotContainer m_robotContainer;
 
   @SuppressWarnings("resource") // Ignore not closing PowerDistribution instance
   public Robot() {
@@ -118,4 +122,14 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void testExit() {}
+
+  @Override
+  public void simulationInit() {}
+
+  /** This function is called periodically whilst in simulation. */
+  @Override
+  public void simulationPeriodic() {
+    SimulatedArena.getInstance().simulationPeriodic();
+    m_robotContainer.displaySimFieldToAdvantageScope();
+  }
 }
