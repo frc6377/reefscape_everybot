@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -13,6 +17,8 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.NoSuchElementException;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -131,5 +137,13 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
     m_robotContainer.displaySimFieldToAdvantageScope();
+    SimulatedArena.getInstance()
+        .addGamePiece(new ReefscapeCoralOnField(new Pose2d(3, 3, Rotation2d.fromDegrees(90))));
+    SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2, 2)));
+
+    // Get the positions of the notes (both on the field and in the air)
+    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
+    // Publish to telemetry using AdvantageKit
+    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
   }
 }

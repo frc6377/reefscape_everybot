@@ -64,7 +64,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private EncoderSim leftEncoderSim;
   private EncoderSim rightEncoderSim;
   private Pigeon2SimState gyroSim;
-  private DifferentialDrivetrainSim diffDriveSim;
+  private static DifferentialDrivetrainSim diffDriveSim;
 
   private DebugEntry<Double> leftEncoderEntry =
       new DebugEntry<Double>(leftEncoderRate, "Left Encoder Rate", this);
