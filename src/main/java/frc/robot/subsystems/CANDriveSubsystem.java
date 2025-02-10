@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
@@ -32,7 +33,9 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import frc.robot.Constants.DriveConstants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -102,11 +105,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightFollower = new VictorSPX(DriveConstants.RIGHT_FOLLOWER_ID);
 
     leftEncoder =
-        new Encoder(
-            DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, false);
+        new Encoder(DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, true);
     rightEncoder =
         new Encoder(
-            DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, true);
+            DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, false);
 
     leftEncoder.setDistancePerPulse(
         Math.PI
@@ -120,10 +122,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
 
-    rightLeader.setInverted(true);
+    rightLeader.setInverted(false);
     rightFollower.setInverted(InvertType.FollowMaster);
 
-    leftLeader.setInverted(false);
+    leftLeader.setInverted(true);
     leftFollower.setInverted(InvertType.FollowMaster);
 
     leftLeader.setNeutralMode(NeutralMode.Brake);
@@ -151,16 +153,17 @@ public class CANDriveSubsystem extends SubsystemBase {
             (speed) -> rightLeader.set(ControlMode.PercentOutput, speed));
 
     // Create drivetrain simulator
-    diffDriveSim =
-        new DifferentialDrivetrainSim(
-            DCMotor.getCIM(2),
-            DriveConstants.GEARING,
-            DriveConstants.MOI.in(KilogramMetersSquaredPerSecond),
-            DriveConstants.MASS.in(Kilograms),
-            DriveConstants.WHEEL_DIAMETER_METERS.in(Meter) / 2,
-            DriveConstants.TRACK_WIDTH_METERS.in(Meter),
-            null);
-
+    if(Robot.isReal()){
+      diffDriveSim =
+          new DifferentialDrivetrainSim(
+              DCMotor.getCIM(2),
+              DriveConstants.GEARING,
+              DriveConstants.MOI.in(KilogramMetersSquaredPerSecond),
+              DriveConstants.MASS.in(Kilograms),
+              DriveConstants.WHEEL_DIAMETER_METERS.in(Meter) / 2,
+              DriveConstants.TRACK_WIDTH_METERS.in(Meter),
+              null);
+    }
     // Create new odometry object
     driveOdometry =
         new DifferentialDriveOdometry(
@@ -213,8 +216,8 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   // Pigeon Functions for Odometry
   public void resetOdometry(Pose2d resetPose) {
-    leftEncoderSim.resetData();
-    rightEncoderSim.resetData(); // Reset encoder values
+    leftEncoder.reset();
+    rightEncoder.reset();
     driveOdometry.resetPose(resetPose);
   }
 
@@ -225,6 +228,10 @@ public class CANDriveSubsystem extends SubsystemBase {
   // Get Current Speed
   public ChassisSpeeds getCurrentSpeeds() {
     return kinematics.toChassisSpeeds(wheelSpeeds);
+  }
+
+  public void setGyroRotation(double Rotation) {
+    gyro.setYaw(Rotation);
   }
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
@@ -256,13 +263,13 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     leftEncoderRevoEntry.log((double) leftEncoder.getRaw() / 2048);
     rightEncoderRevoEntry.log((double) rightEncoder.getRaw() / 2048);
-
+    SmartDashboard.putNumber("Gyro Heading", gyroHeading.getDegrees());
     SmartDashboard.putNumber(
         "leftMotorInput", leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     SmartDashboard.putNumber(
         "rightMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
-
+    SmartDashboard.putNumber("Gyro", gyro.getAccumGyroZ().getValue().in(Degrees));
     position =
         driveOdometry.update(
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
@@ -304,5 +311,9 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public Command stopRobotCommand() {
     return run(() -> diffDrive.arcadeDrive(0.0, 0.0));
+  }
+
+  public Command zeroGyro() {
+    return Commands.runOnce(() -> setGyroRotation(0.0), this);
   }
 }

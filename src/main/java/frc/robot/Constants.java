@@ -29,7 +29,7 @@ public final class Constants {
     public static final int LEFT_DRIVE_ENCODER_A = 5;
     public static final int LEFT_DRIVE_ENCODER_B = 6;
 
-    public static final int PIGEON_DEVICE_ID = 0;
+    public static final int PIGEON_DEVICE_ID = 5;
 
     public static final Distance TRACK_WIDTH_METERS = Meters.of(0.5715);
 
