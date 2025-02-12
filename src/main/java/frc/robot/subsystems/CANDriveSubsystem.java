@@ -35,8 +35,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Robot;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 import utilities.DebugEntry;
@@ -105,10 +105,11 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightFollower = new VictorSPX(DriveConstants.RIGHT_FOLLOWER_ID);
 
     leftEncoder =
-        new Encoder(DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, true);
+        new Encoder(
+            DriveConstants.LEFT_DRIVE_ENCODER_A, DriveConstants.LEFT_DRIVE_ENCODER_B, false);
     rightEncoder =
         new Encoder(
-            DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, false);
+            DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, true);
 
     leftEncoder.setDistancePerPulse(
         Math.PI
@@ -122,10 +123,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
 
-    rightLeader.setInverted(false);
+    rightLeader.setInverted(true);
     rightFollower.setInverted(InvertType.FollowMaster);
 
-    leftLeader.setInverted(true);
+    leftLeader.setInverted(false);
     leftFollower.setInverted(InvertType.FollowMaster);
 
     leftLeader.setNeutralMode(NeutralMode.Brake);
@@ -153,7 +154,7 @@ public class CANDriveSubsystem extends SubsystemBase {
             (speed) -> rightLeader.set(ControlMode.PercentOutput, speed));
 
     // Create drivetrain simulator
-    if(Robot.isReal()){
+    if (Robot.isSimulation()) {
       diffDriveSim =
           new DifferentialDrivetrainSim(
               DCMotor.getCIM(2),
@@ -234,6 +235,12 @@ public class CANDriveSubsystem extends SubsystemBase {
     gyro.setYaw(Rotation);
   }
 
+  public void zeroPosition() {
+    Rotation2d zeroRotation = new Rotation2d(0);
+    Pose2d zeroPose = new Pose2d(0.0, 0.0, zeroRotation);
+    driveOdometry.resetPose(zeroPose);
+  }
+
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
     diffDrive.arcadeDrive(
         relativeSpeeds.vxMetersPerSecond
@@ -244,6 +251,7 @@ public class CANDriveSubsystem extends SubsystemBase {
         "ForwardInput",
         relativeSpeeds.vxMetersPerSecond
             / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond));
+
     SmartDashboard.putNumber("PathPlannerForwardInput", relativeSpeeds.vxMetersPerSecond);
   }
 
@@ -263,7 +271,7 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     leftEncoderRevoEntry.log((double) leftEncoder.getRaw() / 2048);
     rightEncoderRevoEntry.log((double) rightEncoder.getRaw() / 2048);
-    SmartDashboard.putNumber("Gyro Heading", gyroHeading.getDegrees());
+
     SmartDashboard.putNumber(
         "leftMotorInput", leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     SmartDashboard.putNumber(
@@ -315,5 +323,9 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public Command zeroGyro() {
     return Commands.runOnce(() -> setGyroRotation(0.0), this);
+  }
+
+  public Command zeroOdometry() {
+    return Commands.runOnce(() -> zeroPosition(), this);
   }
 }

@@ -58,6 +58,8 @@ public final class Constants {
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
     public static final double ROLLER_EJECT_PERCENT = 0.44;
     public static final double ROLLER_INTAKE_PERCENT = -0.44;
+
+    public static final Time EJECT_TIME = Seconds.of(2);
   }
 
   public static final class OperatorConstants {

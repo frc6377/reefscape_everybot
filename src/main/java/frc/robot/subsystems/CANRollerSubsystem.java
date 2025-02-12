@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -12,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,6 +22,8 @@ import frc.robot.Constants.RollerConstants;
 /** Class to run the rollers over CAN */
 public class CANRollerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
+
+  private Timer timer = new Timer();
 
   public CANRollerSubsystem() {
     // Set up the roller motor as a brushed motor
@@ -46,7 +50,7 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   // Run Roller at given speed
   public Command runRollerCommand(double percent) {
-    return Commands.run(() -> rollerMotor.set(percent));
+    return startEnd(() -> rollerMotor.set(percent), () -> rollerMotor.set(0));
   }
 
   // Scoring method
@@ -60,5 +64,10 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   public Command stopRoller() {
     return runRollerCommand(0.0);
+  }
+
+  public Command timedEjectCommand() {
+    return Commands.deadline(
+        Commands.waitSeconds(RollerConstants.EJECT_TIME.in(Seconds)), ejectCommand());
   }
 }

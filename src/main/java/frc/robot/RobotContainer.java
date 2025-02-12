@@ -46,6 +46,7 @@ public class RobotContainer {
     // autoChooser.addOption
 
     NamedCommands.registerCommand("ScoreL1", rollerSubsystem.ejectCommand());
+    NamedCommands.registerCommand("StopRoller", rollerSubsystem.stopRoller());
   }
 
   /**
@@ -67,8 +68,9 @@ public class RobotContainer {
     /// Set driveSUbystem's default Command to be arcadeDrive
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> driverController.getLeftY(), () -> driverController.getRightX()));
+            () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
     driverController.start().onTrue(driveSubsystem.zeroGyro());
+    driverController.x().onTrue(driveSubsystem.zeroOdometry());
   }
 
   /**
