@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
+import java.util.HashMap;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -39,14 +40,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    registerCommands();
     configureBindings();
-
-    // Set the options to show up in the Dashboard for selecting auto modes. If you
-    // add additional auto modes you can add additional lines here with
-    // autoChooser.addOption
-
-    NamedCommands.registerCommand("ScoreL1", rollerSubsystem.ejectCommand());
-    NamedCommands.registerCommand("StopRoller", rollerSubsystem.stopRoller());
   }
 
   /**
@@ -58,12 +53,23 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  public void registerCommands() {
+    HashMap<String, Command> autonCommands = new HashMap<String, Command>();
+
+    autonCommands.put("ScoreCoralL1", rollerSubsystem.ejectCommand());
+    autonCommands.put("RollerIntakeCommand", rollerSubsystem.intakeCommand());
+
+    NamedCommands.registerCommands(autonCommands);
+  }
+
   private void configureBindings() {
     // Set input A from driver controller to run ejectCommand
     driverController.a().whileTrue(rollerSubsystem.ejectCommand());
 
     // Set input B from driver controller to run intakeCommand
     driverController.b().whileTrue(rollerSubsystem.intakeCommand());
+
+    driverController.y().onTrue(rollerSubsystem.timedEjectCommand());
 
     /// Set driveSUbystem's default Command to be arcadeDrive
     driveSubsystem.setDefaultCommand(

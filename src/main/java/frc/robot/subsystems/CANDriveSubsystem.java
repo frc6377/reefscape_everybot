@@ -328,4 +328,8 @@ public class CANDriveSubsystem extends SubsystemBase {
   public Command zeroOdometry() {
     return Commands.runOnce(() -> zeroPosition(), this);
   }
+
+  // public Command resetPathPose{
+
+  // }
 }
