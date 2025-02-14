@@ -34,13 +34,14 @@ public class RobotContainer {
   private final CommandXboxController operatorController =
       new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
 
+  // Registering Auto Commands
   // The autonomous chooser
-  private final LoggedDashboardChooser<Command> autoChooser =
-      new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    registerCommands();
+    registerAutoCommands();
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureBindings();
   }
 
@@ -53,7 +54,7 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  public void registerCommands() {
+  public void registerAutoCommands() {
     HashMap<String, Command> autonCommands = new HashMap<String, Command>();
 
     autonCommands.put("ScoreCoralL1", rollerSubsystem.ejectCommand());

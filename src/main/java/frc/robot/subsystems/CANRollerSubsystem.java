@@ -13,7 +13,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,8 +21,6 @@ import frc.robot.Constants.RollerConstants;
 /** Class to run the rollers over CAN */
 public class CANRollerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
-
-  private Timer timer = new Timer();
 
   public CANRollerSubsystem() {
     // Set up the roller motor as a brushed motor

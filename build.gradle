@@ -197,7 +197,7 @@ jar {
             it.isDirectory() ? it : zipTree(it)
         }
     }
-    from sourceSets.main.allSource
+    from sourceSets.main.java
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
