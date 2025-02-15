@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.StatusCode;
+
 import edu.wpi.first.units.measure.*;
 
 /**
@@ -52,7 +54,7 @@ public final class Constants {
     public static final double ENCODER_RESOLUTION = 2048;
   }
 
-  public static final class RollerConstants {
+  public static final class CoralScorerConstants {
     public static final int ROLLER_MOTOR_ID = 5;
     public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
@@ -65,5 +67,27 @@ public final class Constants {
   public static final class OperatorConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
     public static final int OPERATOR_CONTROLLER_PORT = 1;
+  }
+
+  public static final class AlgaeScorerConstants {
+    public static final int PIVOT_MOTOR_ID = 6;
+    public static final int ROLLER_MOTOR_ID = 7;
+
+    public static final int PIVOT_ENCODER_A = 3;
+    public static final int PIVOT_ENCODER_B = 4;
+
+    public static final int ENCODER_RESOLUTION = 2048;
+
+    public static final Angle SETPOINT_ONE = Degrees.of(0);
+    public static final Angle SETPOINT_TWO = Degrees.of(50);
+
+    public static double INTAKE_SPEED_PERCENT = 0.5;
+    public static double OUTAKE_TAKE_SPEED_PERCENT = 0.5;
+
+    public final class PivotPID {
+      public static final double p = 1;
+      public static final double i = 1;
+      public static final double d = 1;
+    }
   }
 }

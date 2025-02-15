@@ -9,9 +9,11 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.AlgaeScorerConstants;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
+import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
-import frc.robot.subsystems.CANRollerSubsystem;
 import java.util.HashMap;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -24,7 +26,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
-  private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
+  private final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
+  private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem = new CANAlgaeManipulatorSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -57,26 +60,33 @@ public class RobotContainer {
   public void registerAutoCommands() {
     HashMap<String, Command> autonCommands = new HashMap<String, Command>();
 
-    autonCommands.put("ScoreCoralL1", rollerSubsystem.ejectCommand());
-    autonCommands.put("RollerIntakeCommand", rollerSubsystem.intakeCommand());
+    autonCommands.put("ScoreCoralL1", coralScorerSubsystem.ejectCommand());
+    autonCommands.put("RollerIntakeCommand", coralScorerSubsystem.intakeCommand());
 
     NamedCommands.registerCommands(autonCommands);
   }
 
   private void configureBindings() {
+    Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
+    Trigger algaeOuttakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
+
+
     // Set input A from driver controller to run ejectCommand
-    driverController.a().whileTrue(rollerSubsystem.ejectCommand());
+    driverController.a().whileTrue(coralScorerSubsystem.ejectCommand());
 
     // Set input B from driver controller to run intakeCommand
-    driverController.b().whileTrue(rollerSubsystem.intakeCommand());
+    driverController.b().whileTrue(coralScorerSubsystem.intakeCommand());
 
-    driverController.y().onTrue(rollerSubsystem.timedEjectCommand());
+    algaeIntakeTrigger.whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
+    algaeOuttakeTrigger.whileTrue(algaeScorerSubsystem.OutakeAlgaeCommand());
 
-    /// Set driveSUbystem's default Command to be arcadeDrive
+
+    algaeScorerSubsystem.setDefaultCommand(algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.SETPOINT_ONE));
+
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
-    driverController.start().onTrue(driveSubsystem.zeroGyro());
+
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
   }
 

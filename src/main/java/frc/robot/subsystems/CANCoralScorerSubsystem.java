@@ -16,15 +16,15 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.RollerConstants;
+import frc.robot.Constants.CoralScorerConstants;
 
 /** Class to run the rollers over CAN */
-public class CANRollerSubsystem extends SubsystemBase {
+public class CANCoralScorerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
 
-  public CANRollerSubsystem() {
+  public CANCoralScorerSubsystem() {
     // Set up the roller motor as a brushed motor
-    rollerMotor = new SparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushed);
+    rollerMotor = new SparkMax(CoralScorerConstants.ROLLER_MOTOR_ID, MotorType.kBrushed);
 
     // Set can timeout. Because this project only sets parameters once on
     // construction, the timeout can be long without blocking robot operation. Code
@@ -36,8 +36,8 @@ public class CANRollerSubsystem extends SubsystemBase {
     // voltage dips. The current limit helps prevent breaker trips or burning out
     // the motor in the event the roller stalls.
     SparkMaxConfig rollerConfig = new SparkMaxConfig();
-    rollerConfig.voltageCompensation(RollerConstants.ROLLER_MOTOR_VOLTAGE_COMP.in(Volts));
-    rollerConfig.smartCurrentLimit((int) RollerConstants.ROLLER_MOTOR_CURRENT_LIMIT.in(Amps));
+    rollerConfig.voltageCompensation(CoralScorerConstants.ROLLER_MOTOR_VOLTAGE_COMP.in(Volts));
+    rollerConfig.smartCurrentLimit((int) CoralScorerConstants.ROLLER_MOTOR_CURRENT_LIMIT.in(Amps));
     rollerMotor.configure(
         rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
@@ -52,11 +52,11 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   // Scoring method
   public Command ejectCommand() {
-    return runRollerCommand(RollerConstants.ROLLER_EJECT_PERCENT);
+    return runRollerCommand(CoralScorerConstants.ROLLER_EJECT_PERCENT);
   }
 
   public Command intakeCommand() {
-    return runRollerCommand(RollerConstants.ROLLER_INTAKE_PERCENT);
+    return runRollerCommand(CoralScorerConstants.ROLLER_INTAKE_PERCENT);
   }
 
   public Command stopRoller() {
@@ -65,6 +65,6 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   public Command timedEjectCommand() {
     return Commands.deadline(
-        Commands.waitSeconds(RollerConstants.EJECT_TIME.in(Seconds)), ejectCommand());
+        Commands.waitSeconds(CoralScorerConstants.EJECT_TIME.in(Seconds)), ejectCommand());
   }
 }
