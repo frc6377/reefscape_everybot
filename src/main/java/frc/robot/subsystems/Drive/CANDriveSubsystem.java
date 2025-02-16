@@ -1,10 +1,11 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Drive;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
+import com.google.flatbuffers.Constants;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -28,7 +29,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Robot;
+
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.function.DoubleSupplier;
+
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 import utilities.DebugEntry;
 
@@ -64,7 +76,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private EncoderSim leftEncoderSim;
   private EncoderSim rightEncoderSim;
   private Pigeon2SimState gyroSim;
-  private static DifferentialDrivetrainSim diffDriveSim;
+  // private static DifferentialDrivetrainSim diffDriveSim;
 
   private DebugEntry<Double> leftEncoderEntry =
       new DebugEntry<Double>(leftEncoderRate, "Left Encoder Rate", this);
@@ -82,6 +94,12 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   ModuleConfig leftModuleConfig;
   ModuleConfig rightModuleConfig;
+
+  private Pose2d driveSimDefualtPose;
+
+  private DriveTrainSimulationConfig driveTrainSimulationConfig;
+
+  private SwerveDriveSimulation differentialDriveSim;
 
   public CANDriveSubsystem() {
     field = new Field2d();
@@ -140,20 +158,43 @@ public class CANDriveSubsystem extends SubsystemBase {
             (speed) -> rightLeader.set(ControlMode.PercentOutput, speed));
 
     // Create drivetrain simulator
-    diffDriveSim =
-        new DifferentialDrivetrainSim(
-            DCMotor.getCIM(2),
-            DriveConstants.GEARING,
-            DriveConstants.MOI,
-            DriveConstants.MASS_KILOGRAMS,
-            DriveConstants.WHEEL_DIAMETER_METERS / 2,
-            DriveConstants.TRACK_WIDTH_METERS,
-            null);
+    // diffDriveSim =
+    //     new DifferentialDrivetrainSim(
+    //         DCMotor.getCIM(2),
+    //         DriveConstants.GEARING,
+    //         DriveConstants.MOI,
+    //         DriveConstants.MASS_KILOGRAMS,
+    //         DriveConstants.WHEEL_DIAMETER_METERS / 2,
+    //         DriveConstants.TRACK_WIDTH_METERS,
+    //         null);
 
     // Create new odometry object
     driveOdometry =
         new DifferentialDriveOdometry(
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
+
+    
+    driveSimDefualtPose = new Pose2d(3,3, new Rotation2d());
+
+  // Create and configure a drivetrain simulation configuration
+  final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
+        .withGyro(COTS.ofPigeon2())
+        .withSwerveModule(new SwerveModuleSimulationConfig(
+                DCMotor.getCIM(1),
+                DCMotor.getCIM(1),
+                DriveConstants.GEARING,
+                DriveConstants.GEARING,
+                Volts.of(0.1),
+                Volts.of(0.1),
+                Inches.of(2),
+                KilogramSquareMeters.of(0.03),
+                DriveConstants.WHEEL_COF))
+        .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24))
+        .withBumperSize(Inches.of(30), Inches.of(30));
+    differentialDriveSim = new SwerveDriveSimulation(driveTrainSimulationConfig, driveSimDefualtPose);
+
+    SimulatedArena.getInstance().addDriveTrainSimulation(differentialDriveSim);
+
 
     defaultPathPlannerSetup();
   }

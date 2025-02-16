@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CANDriveSubsystem;
+import frc.robot.subsystems.Drive.CANDriveSubsystem;
 
 public final class Autos {
   // Example autonomous command which drives forward for 1 second.

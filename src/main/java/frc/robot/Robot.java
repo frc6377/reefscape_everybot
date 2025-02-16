@@ -82,7 +82,9 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_robotContainer.resetSimulationField();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -130,16 +132,17 @@ public class Robot extends LoggedRobot {
   public void testExit() {}
 
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    SimulatedArena.getInstance()
+        .addGamePiece(new ReefscapeCoralOnField(new Pose2d(3, 3, Rotation2d.fromDegrees(90))));
+    SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2, 2)));
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
     m_robotContainer.displaySimFieldToAdvantageScope();
-    SimulatedArena.getInstance()
-        .addGamePiece(new ReefscapeCoralOnField(new Pose2d(3, 3, Rotation2d.fromDegrees(90))));
-    SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2, 2)));
 
     // Get the positions of the notes (both on the field and in the air)
     Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");

@@ -4,18 +4,25 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
+import frc.robot.subsystems.Drive.CANDriveSubsystem;
+
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -42,7 +49,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser =
       new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-  private final DifferentialDrivetrainSim differentialDriveSim;
+
+  // SimulatedArena.getInstance().resetFieldForAuto();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -51,15 +59,8 @@ public class RobotContainer {
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
-    differentialDriveSim =
-        new DifferentialDrivetrainSim(
-            DCMotor.getCIM(2),
-            DriveConstants.GEARING,
-            DriveConstants.MOI,
-            DriveConstants.MASS_KILOGRAMS,
-            DriveConstants.WHEEL_DIAMETER_METERS / 2,
-            DriveConstants.TRACK_WIDTH_METERS,
-            null);
+
+
     NamedCommands.registerCommand("ScoreL1", rollerSubsystem.ejectCommand());
   }
 
@@ -94,10 +95,15 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
+  public void resetSimulationField() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+    SimulatedArena.getInstance().resetFieldForAuto();
+  }
+
   public void displaySimFieldToAdvantageScope() {
     if (Constants.currentMode != Constants.Mode.SIM) return;
 
-    Logger.recordOutput("FieldSimulation/RobotPosition", differentialDriveSim.getPose());
+    Logger.recordOutput("FieldSimulation/RobotPosition", "null");
     Logger.recordOutput(
         "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     Logger.recordOutput(
