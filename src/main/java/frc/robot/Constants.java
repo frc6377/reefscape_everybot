@@ -6,8 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.StatusCode;
-
 import edu.wpi.first.units.measure.*;
 
 /**
@@ -70,16 +68,16 @@ public final class Constants {
   }
 
   public static final class AlgaeScorerConstants {
-    public static final int PIVOT_MOTOR_ID = 6;
-    public static final int ROLLER_MOTOR_ID = 7;
+    public static final int PIVOT_MOTOR_ID = 7;
+    public static final int ROLLER_MOTOR_ID = 8;
 
     public static final int PIVOT_ENCODER_A = 3;
     public static final int PIVOT_ENCODER_B = 4;
 
     public static final int ENCODER_RESOLUTION = 2048;
 
-    public static final Angle SETPOINT_ONE = Degrees.of(0);
-    public static final Angle SETPOINT_TWO = Degrees.of(50);
+    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(0);
+    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(50);
 
     public static double INTAKE_SPEED_PERCENT = 0.5;
     public static double OUTAKE_TAKE_SPEED_PERCENT = 0.5;

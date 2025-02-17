@@ -27,7 +27,8 @@ public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
   private final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
-  private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem = new CANAlgaeManipulatorSubsystem();
+  private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
+      new CANAlgaeManipulatorSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -70,7 +71,6 @@ public class RobotContainer {
     Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
     Trigger algaeOuttakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
 
-
     // Set input A from driver controller to run ejectCommand
     driverController.a().whileTrue(coralScorerSubsystem.ejectCommand());
 
@@ -80,8 +80,8 @@ public class RobotContainer {
     algaeIntakeTrigger.whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
     algaeOuttakeTrigger.whileTrue(algaeScorerSubsystem.OutakeAlgaeCommand());
 
-
-    algaeScorerSubsystem.setDefaultCommand(algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.SETPOINT_ONE));
+    algaeScorerSubsystem.setDefaultCommand(
+        algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_STOW_ANGLE));
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
