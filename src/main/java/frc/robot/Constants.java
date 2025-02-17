@@ -24,6 +24,8 @@ public final class Constants {
 
     public static final int LEFT_DRIVE_ENCODER_A = 5;
     public static final int LEFT_DRIVE_ENCODER_B = 6;
+
+    public static final double CONTROL_CURVE_INTENSITY = 0.5;
   }
 
   public static final class RollerConstants {

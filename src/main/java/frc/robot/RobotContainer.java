@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANDriveSubsystem;
@@ -64,7 +67,12 @@ public class RobotContainer {
     /// Set driveSUbystem's default Command to be arcadeDrive
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> driverController.getLeftY(), () -> driverController.getRightX()));
+            () -> cubicCurve(() -> driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> driverController.getRightX()));
+  }
+
+  //Dricer Control Curve
+  public double cubicCurve(DoubleSupplier input, double intensity) {
+    return intensity * Math.pow(input.getAsDouble(), 3) + (1 - intensity) * input.getAsDouble();
   }
 
   /**
