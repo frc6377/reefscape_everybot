@@ -67,6 +67,7 @@ public final class Constants {
     public static final int OPERATOR_CONTROLLER_PORT = 1;
   }
 
+  //FIXME: AlgaeScorerConstants is completely wrong, all numbers are placeholders
   public static final class AlgaeScorerConstants {
     public static final int PIVOT_MOTOR_ID = 7;
     public static final int ROLLER_MOTOR_ID = 8;
@@ -81,6 +82,13 @@ public final class Constants {
 
     public static double INTAKE_SPEED_PERCENT = 0.5;
     public static double OUTAKE_TAKE_SPEED_PERCENT = 0.5;
+
+    public static final Mass ARM_MASS = Kilograms.of(4);
+    public static final Distance ARM_LENGTH = Feet.of(3);
+    public static final LinearAcceleration GRAVITY = MetersPerSecondPerSecond.of(9.81);
+    public static final AngularMomentum ARM_MOI = KilogramMetersSquaredPerSecond.of(5);
+
+    public static final Torque MAX_ARM_TORQUE = NewtonMeters.of(2);
 
     public final class PivotPID {
       public static final double p = 1;
