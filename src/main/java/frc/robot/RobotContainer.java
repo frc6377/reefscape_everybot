@@ -68,7 +68,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
+    Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.0);
     Trigger algaeOuttakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
 
     // Set input A from driver controller to run ejectCommand

@@ -23,7 +23,11 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -39,8 +43,13 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   private final HowdyPID pivotPID;
 
-  private final MechanismLigament2d pivotSim;
-  private final MechanismLigament2d pivotSetAngleSim;
+  private final Mechanism2d pivotMech = new Mechanism2d(2, 2);
+
+  private final MechanismLigament2d pivotArmMech;
+  private final MechanismLigament2d pivotSetAngleMech;
+
+  private final ComplexWidget simWidget =
+      Shuffleboard.getTab(getName()).add("Pivot Arm", pivotMech);
 
   private DebugEntry<Double> pivotSetAngleEntry =
       new DebugEntry<Double>(0.0, "SetPivotAngle", this);
@@ -62,28 +71,39 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     pivotEncoder.setDistancePerPulse(360.0 / AlgaeScorerConstants.ENCODER_RESOLUTION);
 
-    pivotPID = new HowdyPID(AlgaeScorerConstants.PivotPID.p, AlgaeScorerConstants.PivotPID.i, AlgaeScorerConstants.PivotPID.d);
+    pivotPID =
+        new HowdyPID(
+            AlgaeScorerConstants.PivotPID.p,
+            AlgaeScorerConstants.PivotPID.i,
+            AlgaeScorerConstants.PivotPID.d);
 
     pivotPID.getPIDController().setSetpoint(AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees));
 
     pivotPID.createTunableNumbers("PivotPID", pivotPID.getPIDController(), this);
 
+    pivotSetAngleMech =
+        pivotMech
+            .getRoot("PivotSetAngle", 1, 1)
+            .append(
+                new MechanismLigament2d(
+                    "PivotSetAngle",
+                    1,
+                    AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees)
+                        + AlgaeScorerConstants.PIVOT_SIM_OFFSET_ANGLE.in(Degrees),
+                    10.0,
+                    new Color8Bit(Color.kRed)));
 
-    pivotSim =
-        new MechanismLigament2d(
-            "Pivot",
-            3,
-            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees),
-            1.0,
-            new Color8Bit(0, 255, 0));
-
-    pivotSetAngleSim =
-        new MechanismLigament2d(
-            "PivotSetAngle",
-            3,
-            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees),
-            1.0,
-            new Color8Bit(255, 0, 0));
+    pivotArmMech =
+        pivotMech
+            .getRoot("CurrentPivotAngle", 1, 0)
+            .append(
+                new MechanismLigament2d(
+                    "PivotArm",
+                    1,
+                    AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees)
+                        + AlgaeScorerConstants.PIVOT_SIM_OFFSET_ANGLE.in(Degrees),
+                    10.0,
+                    new Color8Bit(Color.kGreen)));
   }
 
   public void calculatePivotPID() {
@@ -91,42 +111,47 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     double currentAngle = pivotEncoder.getDistance();
     double PIDOutput = pivotPID.getPIDController().calculate(currentAngle, targetAngle);
 
-    //TODO: Need to scale PIDOutput in some way
+    // TODO: Need to scale PIDOutput in some way
     pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput);
   }
 
   private Torque calculateGravityTorque(double armAngleRadians) {
-    return NewtonMeters.of(AlgaeScorerConstants.ARM_MASS.in(Kilograms) * AlgaeScorerConstants.GRAVITY.in(MetersPerSecondPerSecond) * AlgaeScorerConstants.ARM_LENGTH.in(Meters) * Math.sin(armAngleRadians));
+    return NewtonMeters.of(
+        AlgaeScorerConstants.ARM_MASS.in(Kilograms)
+            * AlgaeScorerConstants.GRAVITY.in(MetersPerSecondPerSecond)
+            * AlgaeScorerConstants.ARM_LENGTH.in(Meters)
+            * Math.sin(armAngleRadians));
   }
 
   private Torque calculateMotorTorque() {
-    double motorPercent = pivotMotor.getMotorOutputPercent(); 
-    return NewtonMeters.of(motorPercent * AlgaeScorerConstants.MAX_ARM_TORQUE.in(NewtonMeters)); 
+    double motorPercent = pivotMotor.getMotorOutputPercent();
+    return NewtonMeters.of(motorPercent * AlgaeScorerConstants.MAX_ARM_TORQUE.in(NewtonMeters));
   }
 
-
-  //NOTE: this method is very experimental, 90% chance won't work, pls remove from simPeriodic before running
-  private void applyGravity(){
+  // NOTE: this method is very experimental, 90% chance won't work, pls remove from simPeriodic
+  // before running
+  private void applyGravity() {
     Time updateTime = Seconds.of(0.02);
 
     double gravityTorque = calculateGravityTorque(pivotEncoder.getDistance()).in(NewtonMeters);
     double motorTorque = calculateMotorTorque().in(NewtonMeters);
 
     Torque netTorque = NewtonMeters.of(motorTorque - gravityTorque);
-    
+
     AngularVelocity currentVelocity = RadiansPerSecond.of(pivotEncoder.getRate());
     Angle currentAngle = Degrees.of(pivotEncoder.getDistance());
 
-    AngularAcceleration angularAcceleration = RadiansPerSecondPerSecond.of(netTorque.in(NewtonMeters)/AlgaeScorerConstants.ARM_MOI.in(KilogramMetersSquaredPerSecond));
+    AngularAcceleration angularAcceleration =
+        RadiansPerSecondPerSecond.of(
+            netTorque.in(NewtonMeters)
+                / AlgaeScorerConstants.ARM_MOI.in(KilogramMetersSquaredPerSecond));
 
-    AngularVelocity newVelocity =  currentVelocity.plus(angularAcceleration.times(updateTime));
+    AngularVelocity newVelocity = currentVelocity.plus(angularAcceleration.times(updateTime));
 
     Angle newAngle = currentAngle.plus(newVelocity.times(updateTime));
 
-    pivotSim.setAngle(newAngle.in(Degrees));
-
+    pivotArmMech.setAngle(newAngle.in(Degrees));
   }
-
 
   public void setRoller(double rollerMotorPercent) {
     rollerMotor.set(VictorSPXControlMode.PercentOutput, rollerMotorPercent);
@@ -145,10 +170,14 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    pivotSim.setAngle(pivotEncoder.getDistance());
-    pivotSetAngleSim.setAngle(pivotPID.getPIDController().getSetpoint());
-    applyGravity();
-    
+    calculatePivotPID();
+    pivotArmMech.setAngle(
+        pivotEncoder.getDistance() + AlgaeScorerConstants.PIVOT_SIM_OFFSET_ANGLE.in(Degrees));
+    pivotSetAngleMech.setAngle(
+        pivotPID.getPIDController().getSetpoint()
+            + AlgaeScorerConstants.PIVOT_SIM_OFFSET_ANGLE.in(Degrees));
+    // applyGravity();
+
   }
 
   public Command intakeAlgaeCommand() {

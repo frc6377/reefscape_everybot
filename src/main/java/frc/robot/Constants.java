@@ -67,7 +67,7 @@ public final class Constants {
     public static final int OPERATOR_CONTROLLER_PORT = 1;
   }
 
-  //FIXME: AlgaeScorerConstants is completely wrong, all numbers are placeholders
+  // FIXME: AlgaeScorerConstants is completely wrong, all numbers are placeholders
   public static final class AlgaeScorerConstants {
     public static final int PIVOT_MOTOR_ID = 7;
     public static final int ROLLER_MOTOR_ID = 8;
@@ -79,6 +79,7 @@ public final class Constants {
 
     public static final Angle PIVOT_STOW_ANGLE = Degrees.of(0);
     public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(50);
+    public static final Angle PIVOT_SIM_OFFSET_ANGLE = Degrees.of(90);
 
     public static double INTAKE_SPEED_PERCENT = 0.5;
     public static double OUTAKE_TAKE_SPEED_PERCENT = 0.5;
