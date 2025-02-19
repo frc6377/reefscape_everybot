@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.RollerConstants;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
 import java.util.HashMap;
@@ -57,7 +58,8 @@ public class RobotContainer {
   public void registerAutoCommands() {
     HashMap<String, Command> autonCommands = new HashMap<String, Command>();
 
-    autonCommands.put("ScoreCoralL1", rollerSubsystem.ejectCommand());
+    autonCommands.put(
+        "ScoreCoralL1", rollerSubsystem.timedEjectCommand(RollerConstants.EJECT_TIME));
     autonCommands.put("RollerIntakeCommand", rollerSubsystem.intakeCommand());
 
     NamedCommands.registerCommands(autonCommands);
@@ -70,7 +72,7 @@ public class RobotContainer {
     // Set input B from driver controller to run intakeCommand
     driverController.b().whileTrue(rollerSubsystem.intakeCommand());
 
-    driverController.y().onTrue(rollerSubsystem.timedEjectCommand());
+    driverController.y().onTrue(rollerSubsystem.timedEjectCommand(RollerConstants.EJECT_TIME));
 
     /// Set driveSUbystem's default Command to be arcadeDrive
     driveSubsystem.setDefaultCommand(

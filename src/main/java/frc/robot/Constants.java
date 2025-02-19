@@ -37,9 +37,9 @@ public final class Constants {
 
     public static final Distance WHEEL_DIAMETER_METERS = Meters.of(0.15240);
 
-    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(3.75);
-    // 1m has 2.75 with 4.5 | 3.5 with 3.87096
-    // 2m has 1.375 with 4.5
+    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(4.5);
+
+    public static AngularVelocity MAX_RADIANS_PER_SECOND = RadiansPerSecond.of(6.675);
 
     public static final double WHEEL_COF = 0.975;
 

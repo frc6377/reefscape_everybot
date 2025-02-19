@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -182,11 +183,9 @@ public class CANDriveSubsystem extends SubsystemBase {
               driveModuleConfig,
               DriveConstants.TRACK_WIDTH_METERS.in(Meter));
     } catch (Exception e) {
-      // Handle exception as needed
       e.printStackTrace();
     }
 
-    // Configure AutoBuilder last
     AutoBuilder.configure(
         this::getPosition, // Robot pose supplier
         this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
@@ -195,11 +194,10 @@ public class CANDriveSubsystem extends SubsystemBase {
         (speeds) ->
             driveRobotRelative(
                 speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds.
-        // Also optionally outputs individual module feedforwards
         new PPLTVController(
             0.02), // PPLTVController is the built in path following controller for differential
         // drive trains
-        config, // The robot configuration
+        config,
         () -> {
           var alliance = DriverStation.getAlliance();
           if (alliance.isPresent()) {
@@ -239,14 +237,10 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
     diffDrive.arcadeDrive(
-        relativeSpeeds.vxMetersPerSecond
-            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
-        relativeSpeeds.omegaRadiansPerSecond);
-
-    SmartDashboard.putNumber(
-        "ForwardInput",
-        relativeSpeeds.vxMetersPerSecond
-            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond));
+        (relativeSpeeds.vxMetersPerSecond
+            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond)),
+        relativeSpeeds.omegaRadiansPerSecond
+            / DriveConstants.MAX_RADIANS_PER_SECOND.in(RadiansPerSecond));
 
     SmartDashboard.putNumber("PathPlannerForwardInput", relativeSpeeds.vxMetersPerSecond);
   }
@@ -279,6 +273,7 @@ public class CANDriveSubsystem extends SubsystemBase {
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
     Logger.recordOutput("Robot Position", position);
+
   }
 
   @Override

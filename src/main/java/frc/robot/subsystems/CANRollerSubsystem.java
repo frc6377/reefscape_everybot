@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -63,8 +64,7 @@ public class CANRollerSubsystem extends SubsystemBase {
     return runRollerCommand(0.0);
   }
 
-  public Command timedEjectCommand() {
-    return Commands.deadline(
-        Commands.waitSeconds(RollerConstants.EJECT_TIME.in(Seconds)), ejectCommand());
+  public Command timedEjectCommand(Time ejectTime) {
+    return Commands.deadline(Commands.waitSeconds(ejectTime.in(Seconds)), ejectCommand());
   }
 }

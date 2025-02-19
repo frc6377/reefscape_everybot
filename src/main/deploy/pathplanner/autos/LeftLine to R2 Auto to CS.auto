@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start to R1"
+            "pathName": "LeftLine to R2"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "ScoreCoralL1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R2 to Coral Station Reversed"
           }
         }
       ]

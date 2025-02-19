@@ -9,12 +9,6 @@
           "data": {
             "pathName": "Start to R1"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreCoralL1"
-          }
         }
       ]
     }
