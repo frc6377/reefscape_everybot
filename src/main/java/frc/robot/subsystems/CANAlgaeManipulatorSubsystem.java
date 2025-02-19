@@ -67,7 +67,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     pivotEncoder =
         new Encoder(
-            AlgaeScorerConstants.PIVOT_ENCODER_A, AlgaeScorerConstants.PIVOT_ENCODER_B, false);
+            AlgaeScorerConstants.PIVOT_ENCODER_A, AlgaeScorerConstants.PIVOT_ENCODER_B, true);
 
     pivotEncoder.setDistancePerPulse(360.0 / AlgaeScorerConstants.ENCODER_RESOLUTION);
 
@@ -111,8 +111,9 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     double currentAngle = pivotEncoder.getDistance();
     double PIDOutput = pivotPID.getPIDController().calculate(currentAngle, targetAngle);
 
-    // TODO: Need to scale PIDOutput in some way
-    pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput);
+    // Limit PID output to prevent excessive movement
+    double limitedOutput = Math.max(-0.5, Math.min(0.5, PIDOutput));
+    pivotMotor.set(VictorSPXControlMode.PercentOutput, limitedOutput);
   }
 
   private Torque calculateGravityTorque(double armAngleRadians) {
