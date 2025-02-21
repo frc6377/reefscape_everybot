@@ -78,7 +78,7 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
-    driverController.start().onTrue(driveSubsystem.zeroGyro());
+
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
   }
 

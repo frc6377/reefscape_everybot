@@ -273,7 +273,6 @@ public class CANDriveSubsystem extends SubsystemBase {
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
     Logger.recordOutput("Robot Position", position);
-
   }
 
   @Override
@@ -312,15 +311,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     return run(() -> diffDrive.arcadeDrive(0.0, 0.0));
   }
 
-  public Command zeroGyro() {
-    return Commands.runOnce(() -> setGyroRotation(0.0), this);
-  }
-
   public Command zeroOdometry() {
     return Commands.runOnce(() -> zeroPosition(), this);
   }
-
-  // public Command resetPathPose{
-
-  // }
 }
