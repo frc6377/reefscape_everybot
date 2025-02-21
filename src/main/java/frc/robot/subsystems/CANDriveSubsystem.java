@@ -129,7 +129,6 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
 
-    
     rightFollower.setInverted(InvertType.FollowMaster);
 
     leftLeader.setInverted(false);
