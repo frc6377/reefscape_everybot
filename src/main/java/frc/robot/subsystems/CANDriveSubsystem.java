@@ -100,7 +100,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     field = new Field2d();
 
     // Create brushed motors for drive
-    leftLeader =https://github.com/frc6377/reefscape_everybot/pull/7/conflict?name=src%252Fmain%252Fjava%252Ffrc%252Frobot%252Fsubsystems%252FCANDriveSubsystem.java&ancestor_oid=43af4622af710f16bc9e92725f97045e39299ab3&base_oid=3a98004cb41a37e399b11570bca37788f160a498&head_oid=a54e8743377b02e564e0e4fd8e0a156ca4b8bd99 new VictorSPX(DriveConstants.LEFT_LEADER_ID);
+    leftLeader = new VictorSPX(DriveConstants.LEFT_LEADER_ID);
     leftFollower = new VictorSPX(DriveConstants.LEFT_FOLLOWER_ID);
     rightLeader = new VictorSPX(DriveConstants.RIGHT_LEADER_ID);
     rightFollower = new VictorSPX(DriveConstants.RIGHT_FOLLOWER_ID);
