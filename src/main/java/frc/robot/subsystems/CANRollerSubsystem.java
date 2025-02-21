@@ -49,6 +49,7 @@ public class CANRollerSubsystem extends SubsystemBase {
   // Run Roller at given speed
   public Command runRollerCommand(double percent) {
     return startEnd(() -> rollerMotor.set(percent), () -> rollerMotor.set(0));
+
   }
 
   // Scoring method
