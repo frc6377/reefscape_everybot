@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1"
+    id "edu.wpi.first.GradleRIO" version "2025.2.1"
     id 'com.diffplug.spotless' version '6.25.0'
     id "com.peterabeles.gversion" version "1.10"
     id "maven-publish"
@@ -69,6 +69,33 @@ gversion {
     dateFormat   = "yyyy-MM-dd HH:mm:ss z"
     timeZone     = "America/Chicago" // Use preferred time zone
     indent       = "  "
+}
+
+task unpackSaddlebags(type: Exec) {
+    onlyIf {
+        System.env['GITHUB_WORKFLOW'] == null
+    }
+    // Possible paths to Git installation
+    // List Linux paths first
+    def gitPaths = [
+        '/usr/bin/git',
+        '/bin/git',
+        'C:/Program Files/Git/bin/git.exe',
+        'C:/Program Files(x86)/Git/bin/git.exe'
+    ]
+    // Set first existing path as the program to execute
+    for (g in gitPaths) {
+        if (file(g).exists()) {
+            executable g
+            break
+        }
+    }
+    // If saddlebags submodule is initialized already, just run update
+    // else initialize the submodule
+    if (file('src/saddlebags/README.md').exists())
+        args 'submodule', 'update'
+    else
+        args 'submodule', 'update', '--init'
 }
 
 
@@ -170,7 +197,7 @@ jar {
             it.isDirectory() ? it : zipTree(it)
         }
     }
-    from sourceSets.main.allSource
+    from sourceSets.main.java
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
@@ -188,6 +215,7 @@ test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
+compileJava.dependsOn("unpackSaddlebags")
 compileJava.finalizedBy("spotlessApply")
 
 sourceSets {

@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2479999999993032,
-        "y": 7.076750000004124
+        "x": 5.167,
+        "y": 2.84
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.755,
-        "y": 6.51125
+        "x": 6.223304035628514,
+        "y": 1.0104277420513676
       },
       "isLocked": false,
-      "linkedName": "Corral"
+      "linkedName": "R2"
     },
     {
       "anchor": {
-        "x": 3.8025,
-        "y": 5.195
+        "x": 3.9449013157894735,
+        "y": 1.2924342105263156
       },
       "prevControl": {
-        "x": 3.3247500000000008,
-        "y": 5.916500000000001
+        "x": 4.63766447368421,
+        "y": 0.82578125
+      },
+      "nextControl": {
+        "x": 2.9713236268985903,
+        "y": 1.9482469592930909
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.268,
+        "y": 1.051
+      },
+      "prevControl": {
+        "x": 2.2129934210526314,
+        "y": 2.4277960526315794
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "K"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],

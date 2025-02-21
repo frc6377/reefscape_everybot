@@ -4,14 +4,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
+import frc.robot.Constants.RollerConstants;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
+import java.util.HashMap;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -32,17 +35,15 @@ public class RobotContainer {
   private final CommandXboxController operatorController =
       new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
 
+  // Registering Auto Commands
   // The autonomous chooser
-  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    registerAutoCommands();
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureBindings();
-
-    // Set the options to show up in the Dashboard for selecting auto modes. If you
-    // add additional auto modes you can add additional lines here with
-    // autoChooser.addOption
-    autoChooser.setDefaultOption("Autonomous", Autos.exampleAuto(driveSubsystem));
   }
 
   /**
@@ -54,6 +55,16 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  public void registerAutoCommands() {
+    HashMap<String, Command> autonCommands = new HashMap<String, Command>();
+
+    autonCommands.put(
+        "ScoreCoralL1", rollerSubsystem.timedEjectCommand(RollerConstants.EJECT_TIME));
+    autonCommands.put("RollerIntakeCommand", rollerSubsystem.intakeCommand());
+
+    NamedCommands.registerCommands(autonCommands);
+  }
+
   private void configureBindings() {
     // Set input A from driver controller to run ejectCommand
     driverController.a().whileTrue(rollerSubsystem.ejectCommand());
@@ -61,10 +72,14 @@ public class RobotContainer {
     // Set input B from driver controller to run intakeCommand
     driverController.b().whileTrue(rollerSubsystem.intakeCommand());
 
+    driverController.y().onTrue(rollerSubsystem.timedEjectCommand(RollerConstants.EJECT_TIME));
+
     /// Set driveSUbystem's default Command to be arcadeDrive
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> driverController.getLeftY(), () -> driverController.getRightX()));
+            () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
+
+    driverController.x().onTrue(driveSubsystem.zeroOdometry());
   }
 
   /**
@@ -73,6 +88,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return autoChooser.get();
   }
 }
