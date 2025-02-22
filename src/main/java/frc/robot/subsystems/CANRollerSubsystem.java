@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Seconds;
+
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.units.measure.Time;
@@ -19,7 +20,6 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   public CANRollerSubsystem() {
     rollerMotor = new VictorSPX(RollerConstants.ROLLER_MOTOR_ID);
-    
   }
 
   @Override
@@ -27,7 +27,9 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   // Run Roller at given speed
   public Command runRollerCommand(double percent) {
-    return startEnd(() -> rollerMotor.set(VictorSPXControlMode.PercentOutput, percent), () -> rollerMotor.set(VictorSPXControlMode.PercentOutput, 0));
+    return startEnd(
+        () -> rollerMotor.set(VictorSPXControlMode.PercentOutput, percent),
+        () -> rollerMotor.set(VictorSPXControlMode.PercentOutput, 0));
   }
 
   // Scoring method
