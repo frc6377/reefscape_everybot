@@ -4,15 +4,9 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
-
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,26 +15,11 @@ import frc.robot.Constants.RollerConstants;
 
 /** Class to run the rollers over CAN */
 public class CANRollerSubsystem extends SubsystemBase {
-  private final SparkMax rollerMotor;
+  private final VictorSPX rollerMotor;
 
   public CANRollerSubsystem() {
-    // Set up the roller motor as a brushed motor
-    rollerMotor = new SparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushed);
-
-    // Set can timeout. Because this project only sets parameters once on
-    // construction, the timeout can be long without blocking robot operation. Code
-    // which sets or gets parameters during operation may need a shorter timeout.
-    rollerMotor.setCANTimeout(75);
-
-    // Create and apply configuration for roller motor. Voltage compensation helps
-    // the roller behave the same as the battery
-    // voltage dips. The current limit helps prevent breaker trips or burning out
-    // the motor in the event the roller stalls.
-    SparkMaxConfig rollerConfig = new SparkMaxConfig();
-    rollerConfig.voltageCompensation(RollerConstants.ROLLER_MOTOR_VOLTAGE_COMP.in(Volts));
-    rollerConfig.smartCurrentLimit((int) RollerConstants.ROLLER_MOTOR_CURRENT_LIMIT.in(Amps));
-    rollerMotor.configure(
-        rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rollerMotor = new VictorSPX(RollerConstants.ROLLER_MOTOR_ID);
+    
   }
 
   @Override
@@ -48,7 +27,7 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   // Run Roller at given speed
   public Command runRollerCommand(double percent) {
-    return startEnd(() -> rollerMotor.set(percent), () -> rollerMotor.set(0));
+    return startEnd(() -> rollerMotor.set(VictorSPXControlMode.PercentOutput, percent), () -> rollerMotor.set(VictorSPXControlMode.PercentOutput, 0));
   }
 
   // Scoring method
