@@ -9,7 +9,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.AlgaeScorerConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
@@ -68,8 +67,8 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.0);
-    Trigger algaeOuttakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
+    Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5);
+    Trigger algaeOuttakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5);
 
     // Set input A from driver controller to run ejectCommand
     driverController.a().whileTrue(coralScorerSubsystem.ejectCommand());
@@ -77,17 +76,19 @@ public class RobotContainer {
     // Set input B from driver controller to run intakeCommand
     driverController.b().whileTrue(coralScorerSubsystem.intakeCommand());
 
-    algaeIntakeTrigger.whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
-    algaeOuttakeTrigger.whileTrue(algaeScorerSubsystem.OutakeAlgaeCommand());
-
-    algaeScorerSubsystem.setDefaultCommand(
-        algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_STOW_ANGLE));
+    // algaeScorerSubsystem.setDefaultCommand(
+    //     algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_STOW_ANGLE));
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
+
+    // driverController
+    //     .y()
+    //     .onTrue(
+    //         algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
   }
 
   /**
