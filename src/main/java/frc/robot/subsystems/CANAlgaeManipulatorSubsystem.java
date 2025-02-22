@@ -4,24 +4,21 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.NewtonMeters;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -32,12 +29,15 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeScorerConstants;
+import frc.robot.Constants.CoralScorerConstants;
 import utilities.DebugEntry;
 import utilities.HowdyPID;
 
 public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   private final VictorSPX pivotMotor;
-  private final VictorSPX rollerMotor;
+  private final SparkMax rollerMotor;
+
+  private final SparkMaxConfig rollerConfig;
 
   private final Encoder pivotEncoder;
 
@@ -60,10 +60,20 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   public CANAlgaeManipulatorSubsystem() {
     pivotMotor = new VictorSPX(AlgaeScorerConstants.PIVOT_MOTOR_ID);
-    rollerMotor = new VictorSPX(AlgaeScorerConstants.ROLLER_MOTOR_ID);
+    rollerMotor = new SparkMax(AlgaeScorerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
 
     pivotMotor.setNeutralMode(NeutralMode.Brake);
-    rollerMotor.setNeutralMode(NeutralMode.Brake);
+    
+    rollerMotor.setCANTimeout(75);
+
+    rollerConfig = new SparkMaxConfig();
+    rollerConfig.idleMode(IdleMode.kBrake);
+    rollerConfig.voltageCompensation(AlgaeScorerConstants.ROLLER_MOTOR_VOLTAGE_COMP.in(Volts));
+    rollerConfig.smartCurrentLimit((int) AlgaeScorerConstants.ROLLER_MOTOR_CURRENT_LIMIT.in(Amps));
+    
+    
+    rollerMotor.configure(
+        rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     pivotEncoder =
         new Encoder(
@@ -106,56 +116,9 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
                     new Color8Bit(Color.kGreen)));
   }
 
-  public void calculatePivotPID() {
-    double targetAngle = pivotPID.getPIDController().getSetpoint();
-    double currentAngle = pivotEncoder.getDistance();
-    double PIDOutput = pivotPID.getPIDController().calculate(currentAngle, targetAngle);
-
-    // Limit PID output to prevent excessive movement
-    double limitedOutput = Math.max(-0.5, Math.min(0.5, PIDOutput));
-    pivotMotor.set(VictorSPXControlMode.PercentOutput, limitedOutput);
-  }
-
-  private Torque calculateGravityTorque(double armAngleRadians) {
-    return NewtonMeters.of(
-        AlgaeScorerConstants.ARM_MASS.in(Kilograms)
-            * AlgaeScorerConstants.GRAVITY.in(MetersPerSecondPerSecond)
-            * AlgaeScorerConstants.ARM_LENGTH.in(Meters)
-            * Math.sin(armAngleRadians));
-  }
-
-  private Torque calculateMotorTorque() {
-    double motorPercent = pivotMotor.getMotorOutputPercent();
-    return NewtonMeters.of(motorPercent * AlgaeScorerConstants.MAX_ARM_TORQUE.in(NewtonMeters));
-  }
-
-  // NOTE: this method is very experimental, 90% chance won't work, pls remove from simPeriodic
-  // before running
-  private void applyGravity() {
-    Time updateTime = Seconds.of(0.02);
-
-    double gravityTorque = calculateGravityTorque(pivotEncoder.getDistance()).in(NewtonMeters);
-    double motorTorque = calculateMotorTorque().in(NewtonMeters);
-
-    Torque netTorque = NewtonMeters.of(motorTorque - gravityTorque);
-
-    AngularVelocity currentVelocity = RadiansPerSecond.of(pivotEncoder.getRate());
-    Angle currentAngle = Degrees.of(pivotEncoder.getDistance());
-
-    AngularAcceleration angularAcceleration =
-        RadiansPerSecondPerSecond.of(
-            netTorque.in(NewtonMeters)
-                / AlgaeScorerConstants.ARM_MOI.in(KilogramMetersSquaredPerSecond));
-
-    AngularVelocity newVelocity = currentVelocity.plus(angularAcceleration.times(updateTime));
-
-    Angle newAngle = currentAngle.plus(newVelocity.times(updateTime));
-
-    pivotArmMech.setAngle(newAngle.in(Degrees));
-  }
 
   public void setRoller(double rollerMotorPercent) {
-    rollerMotor.set(VictorSPXControlMode.PercentOutput, rollerMotorPercent);
+    rollerMotor.set(rollerMotorPercent);
   }
 
   public void setPivotAngle(Angle setAngle) {
@@ -171,13 +134,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    calculatePivotPID();
-    pivotArmMech.setAngle(
-        pivotEncoder.getDistance() + AlgaeScorerConstants.PIVOT_SIM_OFFSET_ANGLE.in(Degrees));
-    pivotSetAngleMech.setAngle(
-        pivotPID.getPIDController().getSetpoint()
-            + AlgaeScorerConstants.PIVOT_SIM_OFFSET_ANGLE.in(Degrees));
-    // applyGravity();
 
   }
 

@@ -109,6 +109,9 @@ public final class Constants {
 
     public static final Torque MAX_ARM_TORQUE = NewtonMeters.of(2);
 
+    public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
+    public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
+
     public final class PivotPID {
       public static final double p = 0.05;
       public static final double i = 0.0;
