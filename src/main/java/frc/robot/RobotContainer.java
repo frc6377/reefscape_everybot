@@ -67,7 +67,7 @@ public class RobotContainer {
     /// Set driveSUbystem's default Command to be arcadeDrive
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> cubicCurve(() -> driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> driverController.getRightX()));
+            () -> cubicCurve(() -> -driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> -driverController.getRightX()));
   }
 
   //Dricer Control Curve
