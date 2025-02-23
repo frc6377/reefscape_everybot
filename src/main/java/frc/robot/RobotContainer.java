@@ -68,14 +68,15 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    Trigger algaeIntakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5);
-    Trigger algaeOuttakeTrigger = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5);
 
-    // Set input A from driver controller to run ejectCommand
-    driverController.a().whileTrue(coralScorerSubsystem.ejectCommand());
 
-    // Set input B from driver controller to run intakeCommand
-    driverController.b().whileTrue(coralScorerSubsystem.intakeCommand());
+    driverController.leftTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
+
+    driverController.leftBumper().whileTrue(coralScorerSubsystem.intakeCommand());
+
+    driverController.rightTrigger().whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
+
+    driverController.rightBumper().whileTrue(algaeScorerSubsystem.OutakeAlgaeCommand());
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
@@ -83,10 +84,6 @@ public class RobotContainer {
 
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
 
-    driverController
-        .y()
-        .onTrue(
-            algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
   }
 
   /**

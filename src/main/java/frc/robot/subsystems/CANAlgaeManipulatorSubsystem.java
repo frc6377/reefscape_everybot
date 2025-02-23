@@ -13,7 +13,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
-import com.ctre.phoenix.motorcontrol.VictorSPXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -42,8 +41,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   private final WPI_VictorSPX pivotMotor;
   private final SparkMax rollerMotor;
 
-  private final VictorSPXSimCollection pivotMotorSim;
-
   private final SparkMaxConfig rollerConfig;
 
   private final Encoder pivotEncoder;
@@ -67,6 +64,8 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
       new DebugEntry<Double>(0.0, "PivotMotorOutput", this);
   private DebugEntry<Double> pivotAngleEntry =
       new DebugEntry<Double>(0.0, "PivotEncoderDistance", this);
+  private DebugEntry<Double> rollerSpeedEntry =
+      new DebugEntry<Double>(0.0, "RollerMotorSpeed", this);
 
   public CANAlgaeManipulatorSubsystem() {
     pivotMotor = new WPI_VictorSPX(AlgaeScorerConstants.PIVOT_MOTOR_ID);
@@ -78,13 +77,16 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     rollerMotor.setCANTimeout(75);
 
+
     rollerConfig = new SparkMaxConfig();
+
     rollerConfig.idleMode(IdleMode.kBrake);
     rollerConfig.voltageCompensation(AlgaeScorerConstants.ROLLER_MOTOR_VOLTAGE_COMP.in(Volts));
     rollerConfig.smartCurrentLimit((int) AlgaeScorerConstants.ROLLER_MOTOR_CURRENT_LIMIT.in(Amps));
 
     rollerMotor.configure(
         rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
 
     pivotEncoder =
         new Encoder(
@@ -101,8 +103,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.PivotPID.d);
 
     pivotPID.setSetpoint(AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees));
-
-    pivotMotorSim = new VictorSPXSimCollection(pivotMotor);
+    pivotPID.setTolerance(3);
 
     pivotSetAngleMechLigament =
         pivotMech
@@ -161,11 +162,21 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotPID.setSetpoint(setAngle.in(Degrees));
   }
 
+  public Boolean pivotAtAngle(Angle targetAngle) {
+    if (Math.abs(pivotEncoder.getDistance() - targetAngle.in(Degrees))
+        > AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND.in(Degrees)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   @Override
   public void periodic() {
     pivotSetAngleEntry.log(pivotPID.getSetpoint());
     pivotMotorOutputEntry.log(pivotMotor.getMotorOutputPercent());
     pivotAngleEntry.log(pivotEncoder.getDistance());
+    rollerSpeedEntry.log(rollerMotor.getAppliedOutput());
     calculatePivotPID();
   }
 
@@ -179,12 +190,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotSetAngleMechLigament.setAngle(pivotPID.getSetpoint());
   }
 
-  public Command intakeAlgaeCommand() {
-    return run(() -> setPivotAngle(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE))
-        .andThen(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT), this)
-        .withName("intakeAlgaeCommand");
-  }
-
   public Command setIntakeAngleCommand(Angle intakeAngle) {
     return runOnce(() -> setPivotAngle(intakeAngle)).withName("setIntakeAngleCommand");
   }
@@ -192,5 +197,19 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   public Command OutakeAlgaeCommand() {
     return run(() -> setRoller(AlgaeScorerConstants.OUTAKE_TAKE_SPEED_PERCENT))
         .withName("OutakeAlgaeCommand");
+  }
+
+  public Command intakeAlgaeCommand() {
+    return runOnce(() -> setPivotAngle(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE))
+        .andThen(run(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT)))
+        .finallyDo(
+            () -> {
+              setPivotAngle(AlgaeScorerConstants.PIVOT_STOW_ANGLE);
+              setRoller(0.0);
+            });
+  }
+
+  public Command setRollerCommand(double speed) {
+    return run(() -> setRoller(speed));
   }
 }
