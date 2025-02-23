@@ -9,7 +9,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.AlgaeScorerConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
@@ -69,7 +68,6 @@ public class RobotContainer {
 
   private void configureBindings() {
 
-
     driverController.leftTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
 
     driverController.leftBumper().whileTrue(coralScorerSubsystem.intakeCommand());
@@ -83,7 +81,6 @@ public class RobotContainer {
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
-
   }
 
   /**

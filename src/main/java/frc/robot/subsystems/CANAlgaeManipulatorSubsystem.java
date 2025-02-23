@@ -77,7 +77,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     rollerMotor.setCANTimeout(75);
 
-
     rollerConfig = new SparkMaxConfig();
 
     rollerConfig.idleMode(IdleMode.kBrake);
@@ -86,7 +85,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     rollerMotor.configure(
         rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
 
     pivotEncoder =
         new Encoder(
@@ -103,29 +101,20 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.PivotPID.d);
 
     pivotPID.setSetpoint(AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees));
-    pivotPID.setTolerance(3);
 
     pivotSetAngleMechLigament =
         pivotMech
             .getRoot("PivotSetAngle", 1, 1)
             .append(
                 new MechanismLigament2d(
-                    "PivotSetAngle",
-                    1,
-                    AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees),
-                    10.0,
-                    new Color8Bit(Color.kRed)));
+                    "PivotSetAngle", 1, pivotPID.getSetpoint(), 10.0, new Color8Bit(Color.kRed)));
 
     pivotArmMechLigament =
         pivotMech
             .getRoot("CurrentPivotAngle", 1, 1)
             .append(
                 new MechanismLigament2d(
-                    "PivotArm",
-                    1,
-                    AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees),
-                    10.0,
-                    new Color8Bit(Color.kGreen)));
+                    "PivotArm", 1, pivotEncoder.getDistance(), 10.0, new Color8Bit(Color.kGreen)));
 
     pivotArmSim =
         new SingleJointedArmSim(
@@ -133,8 +122,8 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.GEARING,
             AlgaeScorerConstants.ARM_MOI.in(KilogramMetersSquaredPerSecond),
             AlgaeScorerConstants.ARM_LENGTH.in(Meters),
-            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians),
             AlgaeScorerConstants.PIVOT_INTAKE_ANGLE.in(Radians),
+            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians),
             true,
             AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians));
   }
