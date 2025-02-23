@@ -77,7 +77,6 @@ public class RobotContainer {
     // Set input B from driver controller to run intakeCommand
     driverController.b().whileTrue(coralScorerSubsystem.intakeCommand());
 
-
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
@@ -86,7 +85,7 @@ public class RobotContainer {
 
     driverController
         .y()
-        .whileTrue(
+        .onTrue(
             algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
   }
 

@@ -21,8 +21,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
@@ -31,16 +31,12 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeScorerConstants;
-import frc.robot.Robot;
 import utilities.DebugEntry;
-import utilities.HowdyPID;
 
 public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   private final WPI_VictorSPX pivotMotor;
@@ -53,7 +49,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   private final Encoder pivotEncoder;
   private final EncoderSim pivotEncoderSim;
 
-  private final HowdyPID pivotPID;
+  private final PIDController pivotPID;
 
   private final SingleJointedArmSim pivotArmSim;
 
@@ -76,7 +72,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotMotor = new WPI_VictorSPX(AlgaeScorerConstants.PIVOT_MOTOR_ID);
     rollerMotor = new SparkMax(AlgaeScorerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
 
-    pivotMotor.setInverted(true);
+    pivotMotor.setInverted(false);
 
     pivotMotor.setNeutralMode(NeutralMode.Brake);
 
@@ -92,21 +88,19 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     pivotEncoder =
         new Encoder(
-            AlgaeScorerConstants.PIVOT_ENCODER_A, AlgaeScorerConstants.PIVOT_ENCODER_B, true);
+            AlgaeScorerConstants.PIVOT_ENCODER_A, AlgaeScorerConstants.PIVOT_ENCODER_B, false);
 
     pivotEncoder.setDistancePerPulse(360.0 / AlgaeScorerConstants.ENCODER_RESOLUTION);
 
     pivotEncoderSim = new EncoderSim(pivotEncoder);
 
     pivotPID =
-        new HowdyPID(
+        new PIDController(
             AlgaeScorerConstants.PivotPID.p,
             AlgaeScorerConstants.PivotPID.i,
             AlgaeScorerConstants.PivotPID.d);
 
-    pivotPID.getPIDController().setSetpoint(AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees));
-
-    pivotPID.createTunableNumbers("PivotPID", pivotPID.getPIDController(), this);
+    pivotPID.setSetpoint(AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees));
 
     pivotMotorSim = new VictorSPXSimCollection(pivotMotor);
 
@@ -145,12 +139,12 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   }
 
   public void calculatePivotPID() {
-    double targetAngle = getPIDSetpoint();
+    double targetAngle = pivotPID.getSetpoint();
     double deadband = AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND.in(Degrees);
-    double currentAngle = getPivotAngle(Degrees);
+    double currentAngle = pivotEncoder.getDistance();
 
     if (Math.abs(currentAngle - targetAngle) > deadband) {
-      double PIDOutput = pivotPID.getPIDController().calculate(currentAngle, targetAngle);
+      double PIDOutput = pivotPID.calculate(currentAngle, targetAngle);
       double limitedOutput = Math.max(-0.5, Math.min(0.5, PIDOutput));
 
       pivotMotor.set(VictorSPXControlMode.PercentOutput, limitedOutput);
@@ -164,38 +158,15 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   }
 
   public void setPivotAngle(Angle setAngle) {
-    pivotPID.getPIDController().setSetpoint(setAngle.in(Degrees));
-  }
-
-  public double getPivotAngle(AngleUnit unit) {
-    if (Robot.isReal()) {
-      return Degrees.of(
-              pivotEncoder.getDistance()
-                  + AlgaeScorerConstants.PIVOT_ENCODER_OFFSET_ANGLE.in(Degrees))
-          .in(unit);
-    } else if (Robot.isSimulation()) {
-      return Degrees.of(
-              pivotEncoderSim.getDistance()
-                  + AlgaeScorerConstants.PIVOT_ENCODER_OFFSET_ANGLE.in(Degrees))
-          .in(unit);
-    } else {
-      return 0;
-    }
-  }
-
-  public double getPIDSetpoint() {
-    return pivotPID.getPIDController().getSetpoint()
-        + AlgaeScorerConstants.PIVOT_ENCODER_OFFSET_ANGLE.in(Degrees);
+    pivotPID.setSetpoint(setAngle.in(Degrees));
   }
 
   @Override
   public void periodic() {
-    pivotSetAngleEntry.log(getPIDSetpoint());
+    pivotSetAngleEntry.log(pivotPID.getSetpoint());
     pivotMotorOutputEntry.log(pivotMotor.getMotorOutputPercent());
-    pivotAngleEntry.log(getPivotAngle(Degrees));
+    pivotAngleEntry.log(pivotEncoder.getDistance());
     calculatePivotPID();
-
-    SmartDashboard.putData(CommandScheduler.getInstance());
   }
 
   @Override
@@ -204,8 +175,8 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotArmSim.update(0.02);
     pivotEncoderSim.setDistance(Radians.of(pivotArmSim.getAngleRads()).in(Degrees));
 
-    pivotArmMechLigament.setAngle(getPivotAngle(Degrees));
-    pivotSetAngleMechLigament.setAngle(getPIDSetpoint());
+    pivotArmMechLigament.setAngle(pivotEncoder.getDistance());
+    pivotSetAngleMechLigament.setAngle(pivotPID.getSetpoint());
   }
 
   public Command intakeAlgaeCommand() {
@@ -215,7 +186,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   }
 
   public Command setIntakeAngleCommand(Angle intakeAngle) {
-    return run(() -> setPivotAngle(intakeAngle)).withName("setIntakeAngleCommand");
+    return runOnce(() -> setPivotAngle(intakeAngle)).withName("setIntakeAngleCommand");
   }
 
   public Command OutakeAlgaeCommand() {
