@@ -31,9 +31,11 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeScorerConstants;
 import frc.robot.Robot;
@@ -52,8 +54,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   private final EncoderSim pivotEncoderSim;
 
   private final HowdyPID pivotPID;
-
-  
 
   private final SingleJointedArmSim pivotArmSim;
 
@@ -147,13 +147,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   public void calculatePivotPID() {
     double targetAngle = getPIDSetpoint();
     double deadband = AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND.in(Degrees);
-    double currentAngle = 0;
-
-    if (Robot.isReal()) {
-      currentAngle = pivotEncoder.getDistance();
-    } else if (Robot.isSimulation()) {
-      currentAngle = pivotEncoderSim.getDistance();
-    }
+    double currentAngle = getPivotAngle(Degrees);
 
     if (Math.abs(currentAngle - targetAngle) > deadband) {
       double PIDOutput = pivotPID.getPIDController().calculate(currentAngle, targetAngle);
@@ -200,13 +194,12 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotMotorOutputEntry.log(pivotMotor.getMotorOutputPercent());
     pivotAngleEntry.log(getPivotAngle(Degrees));
     calculatePivotPID();
-    
+
+    SmartDashboard.putData(CommandScheduler.getInstance());
   }
 
   @Override
   public void simulationPeriodic() {
-    calculatePivotPID();
-
     pivotArmSim.setInputVoltage(pivotMotor.getMotorOutputVoltage());
     pivotArmSim.update(0.02);
     pivotEncoderSim.setDistance(Radians.of(pivotArmSim.getAngleRads()).in(Degrees));
@@ -217,14 +210,16 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   public Command intakeAlgaeCommand() {
     return run(() -> setPivotAngle(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE))
-        .andThen(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT), this);
+        .andThen(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT), this)
+        .withName("intakeAlgaeCommand");
   }
 
   public Command setIntakeAngleCommand(Angle intakeAngle) {
-    return run(() -> setPivotAngle(intakeAngle));
+    return run(() -> setPivotAngle(intakeAngle)).withName("setIntakeAngleCommand");
   }
 
   public Command OutakeAlgaeCommand() {
-    return run(() -> setRoller(AlgaeScorerConstants.OUTAKE_TAKE_SPEED_PERCENT));
+    return run(() -> setRoller(AlgaeScorerConstants.OUTAKE_TAKE_SPEED_PERCENT))
+        .withName("OutakeAlgaeCommand");
   }
 }

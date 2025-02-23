@@ -9,6 +9,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.AlgaeScorerConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
@@ -76,8 +77,6 @@ public class RobotContainer {
     // Set input B from driver controller to run intakeCommand
     driverController.b().whileTrue(coralScorerSubsystem.intakeCommand());
 
-    // algaeScorerSubsystem.setDefaultCommand(
-    //     algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_STOW_ANGLE));
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
@@ -85,10 +84,10 @@ public class RobotContainer {
 
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
 
-    // driverController
-    //     .y()
-    //     .onTrue(
-    //         algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
+    driverController
+        .y()
+        .whileTrue(
+            algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
   }
 
   /**
