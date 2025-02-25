@@ -107,14 +107,18 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             .getRoot("PivotSetAngle", 1, 1)
             .append(
                 new MechanismLigament2d(
-                    "PivotSetAngle", 1, pivotPID.getSetpoint(), 10.0, new Color8Bit(Color.kRed)));
+                    "PivotSetAngle", 1, pivotPID.getSetpoint(), 10.0, new Color8Bit(Color.kGreen)));
 
     pivotArmMechLigament =
         pivotMech
             .getRoot("CurrentPivotAngle", 1, 1)
             .append(
                 new MechanismLigament2d(
-                    "PivotArm", 1, pivotEncoder.getDistance(), 10.0, new Color8Bit(Color.kGreen)));
+                    "PivotArm",
+                    1,
+                    pivotEncoder.getDistance(),
+                    10.0,
+                    new Color8Bit(Color.kRoyalBlue)));
 
     pivotArmSim =
         new SingleJointedArmSim(
@@ -135,9 +139,8 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     if (Math.abs(currentAngle - targetAngle) > deadband) {
       double PIDOutput = pivotPID.calculate(currentAngle, targetAngle);
-      double limitedOutput = Math.max(-0.5, Math.min(0.5, PIDOutput));
 
-      pivotMotor.set(VictorSPXControlMode.PercentOutput, limitedOutput);
+      pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput);
     } else {
       pivotMotor.set(VictorSPXControlMode.PercentOutput, 0);
     }

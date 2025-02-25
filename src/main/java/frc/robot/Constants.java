@@ -116,7 +116,7 @@ public final class Constants {
     public static final Angle PIVOT_ANGLE_DEADBAND = Degrees.of(2);
 
     public final class PivotPID {
-      public static final double p = 0.05;
+      public static final double p = 0.01;
       public static final double i = 0.0;
       public static final double d = 0.01;
     }
