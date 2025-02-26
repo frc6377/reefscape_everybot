@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeScorerConstants;
 import utilities.DebugEntry;
@@ -71,7 +72,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotMotor = new WPI_VictorSPX(AlgaeScorerConstants.PIVOT_MOTOR_ID);
     rollerMotor = new SparkMax(AlgaeScorerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
 
-    pivotMotor.setInverted(false);
+    pivotMotor.setInverted(true);
 
     pivotMotor.setNeutralMode(NeutralMode.Brake);
 
@@ -99,8 +100,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.PivotPID.p,
             AlgaeScorerConstants.PivotPID.i,
             AlgaeScorerConstants.PivotPID.d);
-
-    pivotPID.setSetpoint(AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Degrees));
 
     pivotSetAngleMechLigament =
         pivotMech
@@ -202,6 +201,6 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   }
 
   public Command setRollerCommand(double speed) {
-    return run(() -> setRoller(speed));
+    return Commands.startEnd(() -> setRoller(speed), () -> setRoller(0), this);
   }
 }

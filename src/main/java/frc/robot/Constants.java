@@ -72,7 +72,7 @@ public final class Constants {
   }
 
   public static final class CoralScorerConstants {
-    public static final int ROLLER_MOTOR_ID = 5;
+    public static final int ROLLER_MOTOR_ID = 6;
     public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
     public static final double ROLLER_EJECT_PERCENT = 0.44;
@@ -88,7 +88,7 @@ public final class Constants {
 
   // FIXME: AlgaeScorerConstants is completely wrong, all numbers are placeholders
   public static final class AlgaeScorerConstants {
-    public static final int PIVOT_MOTOR_ID = 7;
+    public static final int PIVOT_MOTOR_ID = 5;
     public static final int ROLLER_MOTOR_ID = 8;
 
     public static final int PIVOT_ENCODER_A = 3;
@@ -96,11 +96,11 @@ public final class Constants {
 
     public static final int ENCODER_RESOLUTION = 2048;
 
-    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(90);
+    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(70);
     public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(45);
 
-    public static double INTAKE_SPEED_PERCENT = 0.5;
-    public static double OUTAKE_TAKE_SPEED_PERCENT = 0.5;
+    public static double INTAKE_SPEED_PERCENT = 0.3;
+    public static double OUTAKE_TAKE_SPEED_PERCENT = 0.3;
 
     public static final Mass ARM_MASS = Kilograms.of(4);
     public static final Distance ARM_LENGTH = Feet.of(3);
