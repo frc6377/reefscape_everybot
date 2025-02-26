@@ -138,6 +138,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
     if (Math.abs(currentAngle - targetAngle) > deadband) {
       double PIDOutput = pivotPID.calculate(currentAngle, targetAngle);
+      // double limitedOutput = Math.max(-0.3, Math.min(PIDOutput, 0.3));
 
       pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput);
     } else {
@@ -153,7 +154,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
     pivotPID.setSetpoint(setAngle.in(Degrees));
   }
 
-  public Boolean pivotAtAngle(Angle targetAngle) {
+  public Boolean isPivotAtAngle(Angle targetAngle) {
     if (Math.abs(pivotEncoder.getDistance() - targetAngle.in(Degrees))
         > AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND.in(Degrees)) {
       return true;

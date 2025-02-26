@@ -42,11 +42,11 @@ public final class Constants {
     public static final int RIGHT_LEADER_ID = 1;
     public static final int RIGHT_FOLLOWER_ID = 2;
 
-    public static final int RIGHT_DRIVE_ENCODER_A = 1;
-    public static final int RIGHT_DRIVE_ENCODER_B = 2;
+    public static final int RIGHT_DRIVE_ENCODER_A = 0;
+    public static final int RIGHT_DRIVE_ENCODER_B = 1;
 
-    public static final int LEFT_DRIVE_ENCODER_A = 5;
-    public static final int LEFT_DRIVE_ENCODER_B = 6;
+    public static final int LEFT_DRIVE_ENCODER_A = 2;
+    public static final int LEFT_DRIVE_ENCODER_B = 3;
 
     public static final int PIGEON_DEVICE_ID = 5;
 
@@ -91,8 +91,8 @@ public final class Constants {
     public static final int PIVOT_MOTOR_ID = 5;
     public static final int ROLLER_MOTOR_ID = 8;
 
-    public static final int PIVOT_ENCODER_A = 3;
-    public static final int PIVOT_ENCODER_B = 4;
+    public static final int PIVOT_ENCODER_A = 4;
+    public static final int PIVOT_ENCODER_B = 5;
 
     public static final int ENCODER_RESOLUTION = 2048;
 
@@ -116,9 +116,9 @@ public final class Constants {
     public static final Angle PIVOT_ANGLE_DEADBAND = Degrees.of(2);
 
     public final class PivotPID {
-      public static final double p = 0.01;
+      public static final double p = 0.0254;
       public static final double i = 0.0;
-      public static final double d = 0.01;
+      public static final double d = 0.0;
     }
   }
 }
