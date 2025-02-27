@@ -7,12 +7,14 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.NewtonMeters;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -102,17 +104,14 @@ public final class Constants {
     public static double INTAKE_SPEED_PERCENT = 0.3;
     public static double OUTAKE_TAKE_SPEED_PERCENT = 0.3;
 
-    public static final Mass ARM_MASS = Kilograms.of(4);
-    public static final Distance ARM_LENGTH = Feet.of(3);
-    public static final LinearAcceleration GRAVITY = MetersPerSecondPerSecond.of(9.81);
-    public static final AngularMomentum ARM_MOI = KilogramMetersSquaredPerSecond.of(0.075);
+    public static final Mass ARM_MASS = Pounds.of(7.2172536);
+    public static final Distance ARM_LENGTH = Inches.of(22.33);
+    public static final AngularMomentum ARM_MOI = KilogramMetersSquaredPerSecond.of(-0.0715890237);
 
-    public static final Torque MAX_ARM_TORQUE = NewtonMeters.of(2);
 
     public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
     public static final double GEARING = 5;
-    public static final Angle PIVOT_ENCODER_OFFSET_ANGLE = Degrees.of(90);
     public static final Angle PIVOT_ANGLE_DEADBAND = Degrees.of(2);
 
     public final class PivotPID {
