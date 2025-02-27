@@ -6,9 +6,11 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -20,6 +22,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -48,6 +51,8 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   private final EncoderSim pivotEncoderSim;
 
   private final PIDController pivotPID;
+
+  private final ArmFeedforward pivotFeedforward;
 
   private final SingleJointedArmSim pivotArmSim;
 
@@ -101,6 +106,12 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.PivotPID.i,
             AlgaeScorerConstants.PivotPID.d);
 
+    pivotFeedforward =
+        new ArmFeedforward(
+            AlgaeScorerConstants.PivotFeedForward.ks,
+            AlgaeScorerConstants.PivotFeedForward.kg,
+            AlgaeScorerConstants.PivotFeedForward.kv);
+
     pivotSetAngleMechLigament =
         pivotMech
             .getRoot("PivotSetAngle", 1, 1)
@@ -125,22 +136,26 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.GEARING,
             AlgaeScorerConstants.ARM_MOI.in(KilogramMetersSquaredPerSecond),
             AlgaeScorerConstants.ARM_LENGTH.in(Meters),
-            AlgaeScorerConstants.PIVOT_INTAKE_ANGLE.in(Radians),
-            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians),
+            0.0,
+            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians) + 1,
             true,
             AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians));
   }
 
   public void calculatePivotPID() {
-    double targetAngle = pivotPID.getSetpoint();
-    double deadband = AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND.in(Degrees);
-    double currentAngle = pivotEncoder.getDistance();
+    Angle targetAngle = Degrees.of(pivotPID.getSetpoint());
+    Angle deadband = AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND;
+    Angle currentAngle = Degrees.of(pivotEncoder.getDistance());
 
-    if (Math.abs(currentAngle - targetAngle) > deadband) {
-      double PIDOutput = pivotPID.calculate(currentAngle, targetAngle);
-      // double limitedOutput = Math.max(-0.3, Math.min(PIDOutput, 0.3));
+    if (Math.abs(currentAngle.in(Degrees) - targetAngle.in(Degrees)) > deadband.in(Degrees)) {
+      double PIDOutput = pivotPID.calculate(currentAngle.in(Degrees), targetAngle.in(Degrees));
+      double FFOutput =
+          pivotFeedforward.calculate(
+              currentAngle.in(Radians),
+              DegreesPerSecond.of(pivotEncoder.getRate()).in(RadiansPerSecond),
+              0.0);
 
-      pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput);
+      pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput + FFOutput);
     } else {
       pivotMotor.set(VictorSPXControlMode.PercentOutput, 0);
     }
