@@ -219,4 +219,16 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   public Command setRollerCommand(double speed) {
     return Commands.startEnd(() -> setRoller(speed), () -> setRoller(0), this);
   }
+
+  public Command togglePivotCommand() {
+    return runOnce(
+            () -> {
+              if (pivotPID.getSetpoint() == AlgaeScorerConstants.PIVOT_INTAKE_ANGLE.in(Degrees)) {
+                setPivotAngle(AlgaeScorerConstants.PIVOT_STOW_ANGLE);
+              } else {
+                setPivotAngle(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE);
+              }
+            })
+        .withName("togglePivotCommand");
+  }
 }

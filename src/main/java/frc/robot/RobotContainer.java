@@ -72,30 +72,19 @@ public class RobotContainer {
     driverController.leftTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
 
     driverController
-        .leftBumper()
+        .rightTrigger()
         .whileTrue(
             algaeScorerSubsystem.setRollerCommand(AlgaeScorerConstants.INTAKE_SPEED_PERCENT));
 
     driverController
         .rightBumper()
         .onTrue(
-            algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
+            algaeScorerSubsystem.togglePivotCommand());
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
-    driverController.x().onTrue(driveSubsystem.zeroOdometry());
-
-    driverController
-        .y()
-        .whileTrue(
-            algaeScorerSubsystem.setRollerCommand(AlgaeScorerConstants.INTAKE_SPEED_PERCENT));
-
-    driverController
-        .a()
-        .onTrue(
-            algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
   }
 
   /**

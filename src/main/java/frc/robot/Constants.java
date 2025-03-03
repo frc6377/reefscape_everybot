@@ -110,15 +110,15 @@ public final class Constants {
 
     public final class PivotPID {
       public static final double p = 0.0354;
-      //
       public static final double i = 0.0;
       public static final double d = 0.0;
     }
 
     public final class PivotFeedForward {
-      public static final double kg = 0.08;
-      public static final double kv = 0.0;
-      public static final double ks = 0.1;
+      //Numbers from recalc
+      public static final double kg = 0.73;
+      public static final double kv = 1.85;
+      public static final double ks = 0.0;
     }
   }
 }
