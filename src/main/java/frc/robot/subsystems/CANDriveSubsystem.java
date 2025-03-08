@@ -39,7 +39,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Robot;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import utilities.DebugEntry;
+
 
 public class CANDriveSubsystem extends SubsystemBase {
   private final VictorSPX leftLeader;
@@ -75,21 +75,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private Pigeon2SimState gyroSim;
   private DifferentialDrivetrainSim diffDriveSim;
 
-  private DebugEntry<Double> leftEncoderEntry =
-      new DebugEntry<Double>(leftEncoderRate, "Left Encoder Rate", this);
-  private DebugEntry<Double> rightEncoderEntry =
-      new DebugEntry<Double>(rightEncoderRate, "Right Encoder Rate", this);
-  private DebugEntry<Rotation2d> gyroHeadingEntry =
-      new DebugEntry<Rotation2d>(gyroHeading, "Gyro Heading", this);
-  private DebugEntry<Double> leftEncoderRevoEntry =
-      new DebugEntry<Double>(leftEncoderRevo, "LeftEncoderRevolutions", this);
-  private DebugEntry<Double> rightEncoderRevoEntry =
-      new DebugEntry<Double>(rightEncoderRevo, "RightEncoderRevolutions", this);
-
   private Field2d field = new Field2d();
-
-  @SuppressWarnings("unused")
-  private final DebugEntry<Field2d> fieldEntry = new DebugEntry<Field2d>(field, "FIELD", this);
 
   RobotConfig config;
 
@@ -122,6 +108,9 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
+
+    leftFollower.follow(leftLeader);
+    rightFollower.follow(rightLeader);
 
     rightLeader.setInverted(true);
     rightFollower.setInverted(InvertType.FollowMaster);
@@ -242,13 +231,6 @@ public class CANDriveSubsystem extends SubsystemBase {
         relativeSpeeds.vxMetersPerSecond
             / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
         relativeSpeeds.omegaRadiansPerSecond);
-
-    SmartDashboard.putNumber(
-        "ForwardInput",
-        relativeSpeeds.vxMetersPerSecond
-            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond));
-
-    SmartDashboard.putNumber("PathPlannerForwardInput", relativeSpeeds.vxMetersPerSecond);
   }
 
   @Override
@@ -261,19 +243,17 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightEncoderRate = rightEncoder.getRate();
     gyroHeading = gyro.getRotation2d();
 
-    leftEncoderEntry.log(leftEncoderRate);
-    rightEncoderEntry.log(rightEncoderRate);
-    gyroHeadingEntry.log(gyroHeading);
+    Logger.recordOutput("Left Encoder Speed", leftEncoderRate);
+    Logger.recordOutput("Right EncoderSpeed", rightEncoderRate);
+    Logger.recordOutput("Gyro Heading", gyroHeading);
 
-    leftEncoderRevoEntry.log((double) leftEncoder.getRaw() / 2048);
-    rightEncoderRevoEntry.log((double) rightEncoder.getRaw() / 2048);
 
-    SmartDashboard.putNumber(
+    Logger.recordOutput(
         "leftMotorInput", leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
-    SmartDashboard.putNumber(
+    Logger.recordOutput(
         "rightMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
-    SmartDashboard.putNumber("Gyro", gyro.getAccumGyroZ().getValue().in(Degrees));
+    Logger.recordOutput("Gyro", gyro.getAccumGyroZ().getValue().in(Degrees));
     position =
         driveOdometry.update(
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());

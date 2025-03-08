@@ -6,15 +6,12 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -39,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeScorerConstants;
+import org.littletonrobotics.junction.Logger;
 import utilities.DebugEntry;
 
 public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
@@ -142,24 +140,24 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians));
   }
 
-  public void calculatePivotPID() {
-    Angle targetAngle = Degrees.of(pivotPID.getSetpoint());
-    Angle deadband = AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND;
-    Angle currentAngle = Degrees.of(pivotEncoder.getDistance());
+  // public void calculatePivotPID() {
+  //   Angle targetAngle = Degrees.of(pivotPID.getSetpoint());
+  //   Angle deadband = AlgaeScorerConstants.PIVOT_ANGLE_DEADBAND;
+  //   Angle currentAngle = Degrees.of(pivotEncoder.getDistance());
 
-    if (Math.abs(currentAngle.in(Degrees) - targetAngle.in(Degrees)) > deadband.in(Degrees)) {
-      double PIDOutput = pivotPID.calculate(currentAngle.in(Degrees), targetAngle.in(Degrees));
-      double FFOutput =
-          pivotFeedforward.calculate(
-              currentAngle.in(Radians),
-              DegreesPerSecond.of(pivotEncoder.getRate()).in(RadiansPerSecond),
-              0.0);
+  //   if (Math.abs(currentAngle.in(Degrees) - targetAngle.in(Degrees)) > deadband.in(Degrees)) {
+  //     double PIDOutput = pivotPID.calculate(currentAngle.in(Degrees), targetAngle.in(Degrees));
+  //     double FFOutput =
+  //         pivotFeedforward.calculate(
+  //             currentAngle.in(Radians),
+  //             DegreesPerSecond.of(pivotEncoder.getRate()).in(RadiansPerSecond),
+  //             0.0);
 
-      pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput + FFOutput);
-    } else {
-      pivotMotor.set(VictorSPXControlMode.PercentOutput, 0);
-    }
-  }
+  //     pivotMotor.set(VictorSPXControlMode.PercentOutput, PIDOutput + FFOutput);
+  //   } else {
+  //     pivotMotor.set(VictorSPXControlMode.PercentOutput, 0);
+  //   }
+  // }
 
   public void setRoller(double rollerMotorPercent) {
     rollerMotor.set(rollerMotorPercent);
@@ -180,11 +178,10 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    pivotSetAngleEntry.log(pivotPID.getSetpoint());
-    pivotMotorOutputEntry.log(pivotMotor.getMotorOutputPercent());
-    pivotAngleEntry.log(pivotEncoder.getDistance());
-    rollerSpeedEntry.log(rollerMotor.getAppliedOutput());
-    calculatePivotPID();
+    Logger.recordOutput("Pivot Setpoint", pivotPID.getSetpoint());
+    Logger.recordOutput("Pivot Motor Output Percent", pivotMotor.getMotorOutputPercent());
+    Logger.recordOutput("PivotAngle", pivotEncoder.getDistance());
+    // calculatePivotPID();
   }
 
   @Override

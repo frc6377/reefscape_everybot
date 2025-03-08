@@ -62,7 +62,6 @@ public class RobotContainer {
     HashMap<String, Command> autonCommands = new HashMap<String, Command>();
 
     autonCommands.put("ScoreCoralL1", coralScorerSubsystem.ejectCommand());
-    autonCommands.put("RollerIntakeCommand", coralScorerSubsystem.intakeCommand());
 
     NamedCommands.registerCommands(autonCommands);
   }
@@ -71,20 +70,23 @@ public class RobotContainer {
 
     driverController.leftTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
 
-    driverController
-        .rightTrigger()
-        .whileTrue(
-            algaeScorerSubsystem.setRollerCommand(AlgaeScorerConstants.INTAKE_SPEED_PERCENT));
-
-    driverController
-        .rightBumper()
-        .onTrue(
-            algaeScorerSubsystem.togglePivotCommand());
+    driverController.leftBumper().onTrue(coralScorerSubsystem.toggleIntakeSpeedCommand());
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
+    driverController.x().onTrue(driveSubsystem.zeroOdometry());
+
+    driverController
+        .y()
+        .whileTrue(
+            algaeScorerSubsystem.setRollerCommand(AlgaeScorerConstants.INTAKE_SPEED_PERCENT));
+
+    driverController
+        .a()
+        .onTrue(
+            algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
   }
 
   /**

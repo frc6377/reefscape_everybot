@@ -72,8 +72,9 @@ public final class Constants {
     public static final int ROLLER_MOTOR_ID = 6;
     public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
-    public static final double ROLLER_EJECT_PERCENT = 0.44;
-    public static final double ROLLER_INTAKE_PERCENT = -0.44;
+    public static final double ROLLER_EJECT_PERCENT_LOW = 0.44;
+    public static final double ROLLER_EJECT_PERCENT_HIGH = 0.55;
+    public static final double ROLLER_INTAKE_PERCENT = -0.54;
 
     public static final Time EJECT_TIME = Seconds.of(2);
   }
@@ -115,10 +116,13 @@ public final class Constants {
     }
 
     public final class PivotFeedForward {
-      //Numbers from recalc
-      public static final double kg = 0.73;
-      public static final double kv = 1.85;
+      // Numbers from recalc - slightly inaccurate
+      public static final double kg = 0.0;
+      public static final double kv = 0.0;
       public static final double ks = 0.0;
+      // public static final double kg = 0;
+      // public static final double kv = 0;
+      // public static final double ks = 0;
     }
   }
 }
