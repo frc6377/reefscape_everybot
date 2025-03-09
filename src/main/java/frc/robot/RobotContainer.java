@@ -14,11 +14,14 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlgaeScorerConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
 import java.util.HashMap;
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -101,7 +104,7 @@ public class RobotContainer {
     if (currentRobotMode == RobotMode.CORAL){
       driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
+            () -> cubicCurve(() -> -driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> -driverController.getRightX()));
 
       driverController.leftTrigger().whileTrue(coralScorerSubsystem.intakeCommand());
       driverController.rightTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
@@ -109,7 +112,7 @@ public class RobotContainer {
     } else if(currentRobotMode == RobotMode.ALGAE){
       driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> driverController.getLeftY(), () -> driverController.getRightX()));
+            () -> cubicCurve(() -> driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> driverController.getRightX()));
 
       driverController.rightTrigger().whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
       driverController.leftTrigger().whileTrue(algaeScorerSubsystem.outakeAlgaeCommand());
@@ -117,6 +120,10 @@ public class RobotContainer {
     }
 
     driverController.a().onTrue(Commands.runOnce(() -> toggleRobotMode(), getRequiredSubsystem()));
+  }
+
+  public double cubicCurve(DoubleSupplier input, double intensity) {
+    return intensity * Math.pow(input.getAsDouble(), 3) + (1 - intensity) * input.getAsDouble();
   }
 
   /**

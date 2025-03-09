@@ -66,6 +66,8 @@ public final class Constants {
     public static final Mass MASS = Kilograms.of(48.885739278871);
 
     public static final double ENCODER_RESOLUTION = 2048;
+
+    public static final double CONTROL_CURVE_INTENSITY = 0.5;
   }
 
   public static final class CoralScorerConstants {
