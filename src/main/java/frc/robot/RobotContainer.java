@@ -4,16 +4,12 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.AlgaeScorerConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
@@ -21,7 +17,7 @@ import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
-
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -37,12 +33,6 @@ public class RobotContainer {
   private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
 
-  public enum RobotMode{
-    ALGAE,
-    CORAL
-  }
-  public static RobotMode currentRobotMode = RobotMode.CORAL;
-
   // The driver's controller
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -55,33 +45,15 @@ public class RobotContainer {
   // The autonomous chooser
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private static boolean coralMode = false;
+
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     registerAutoCommands();
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureBindings();
   }
-
-  public static RobotMode getRobotMode(){
-    return currentRobotMode;
-  }
-
-  private Subsystem getRequiredSubsystem(){
-    if(currentRobotMode == RobotMode.CORAL){
-      return algaeScorerSubsystem;
-    } else {
-      return coralScorerSubsystem;
-    }
-  }
-
-  private static void toggleRobotMode(){
-    if(currentRobotMode == RobotMode.CORAL){
-      currentRobotMode = RobotMode.ALGAE;
-    } else {
-      currentRobotMode = RobotMode.CORAL;
-    }
-  }
-
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -101,25 +73,52 @@ public class RobotContainer {
   }
 
   public void configureBindings() {
-    if (currentRobotMode == RobotMode.CORAL){
-      driveSubsystem.setDefaultCommand(
+    driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> cubicCurve(() -> -driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> -driverController.getRightX()));
+            () ->
+                cubicCurve(
+                    () -> -driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY),
+            () -> -driverController.getRightX()));
+          
+    
 
-      driverController.leftTrigger().whileTrue(coralScorerSubsystem.intakeCommand());
-      driverController.rightTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
-      driverController.leftBumper().onTrue(coralScorerSubsystem.toggleIntakeSpeedCommand());
-    } else if(currentRobotMode == RobotMode.ALGAE){
-      driveSubsystem.setDefaultCommand(
-        driveSubsystem.arcadeDrive(
-            () -> cubicCurve(() -> driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY), () -> driverController.getRightX()));
+    // Coral Mode Buttons
+    driverController
+        .leftTrigger()
+        .and(() -> coralMode)
+        .whileTrue(coralScorerSubsystem.intakeCommand());
+    driverController
+        .rightTrigger()
+        .and(() -> coralMode)
+        .whileTrue(coralScorerSubsystem.ejectCommand());
+    driverController
+        .leftBumper()
+        .and(() -> coralMode)
+        .onTrue(coralScorerSubsystem.toggleIntakeSpeedCommand());
 
-      driverController.rightTrigger().whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
-      driverController.leftTrigger().whileTrue(algaeScorerSubsystem.outakeAlgaeCommand());
-      driverController.rightBumper().onTrue(algaeScorerSubsystem.togglePivotCommand());
-    }
+    // Algae Mode Buttons
+    driverController
+        .rightTrigger()
+        .and(() -> !coralMode)
+        .whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
+    driverController
+        .leftTrigger()
+        .and(() -> !coralMode)
+        .whileTrue(algaeScorerSubsystem.outakeAlgaeCommand());
+    driverController
+        .rightBumper()
+        .and(() -> !coralMode)
+        .onTrue(algaeScorerSubsystem.togglePivotCommand());
 
-    driverController.a().onTrue(Commands.runOnce(() -> toggleRobotMode(), getRequiredSubsystem()));
+    // Mode Switching
+    driverController
+        .a()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  coralMode = !coralMode;
+                  Logger.recordOutput("Mode/Score Mode", coralMode);
+                }));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {
