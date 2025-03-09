@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlgaeScorerConstants;
@@ -32,6 +34,12 @@ public class RobotContainer {
   private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
 
+  public enum RobotMode{
+    ALGAE,
+    CORAL
+  }
+  public static RobotMode currentRobotMode = RobotMode.CORAL;
+
   // The driver's controller
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -51,6 +59,27 @@ public class RobotContainer {
     configureBindings();
   }
 
+  public static RobotMode getRobotMode(){
+    return currentRobotMode;
+  }
+
+  private Subsystem getRequiredSubsystem(){
+    if(currentRobotMode == RobotMode.CORAL){
+      return algaeScorerSubsystem;
+    } else {
+      return coralScorerSubsystem;
+    }
+  }
+
+  private static void toggleRobotMode(){
+    if(currentRobotMode == RobotMode.CORAL){
+      currentRobotMode = RobotMode.ALGAE;
+    } else {
+      currentRobotMode = RobotMode.CORAL;
+    }
+  }
+
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -68,31 +97,26 @@ public class RobotContainer {
     NamedCommands.registerCommands(autonCommands);
   }
 
-  private void configureBindings() {
-
-    driverController.leftTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
-
-    driverController.leftBumper().onTrue(coralScorerSubsystem.toggleIntakeSpeedCommand());
-
-    driverController.rightBumper().onTrue(algaeScorerSubsystem.togglePivotCommand());
-
-    driveSubsystem.setDefaultCommand(
+  public void configureBindings() {
+    if (currentRobotMode == RobotMode.CORAL){
+      driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
-    driverController.x().onTrue(algaeScorerSubsystem.setIntakeAngleCommand(Degrees.of(0.0)));
+      driverController.leftTrigger().whileTrue(coralScorerSubsystem.intakeCommand());
+      driverController.rightTrigger().whileTrue(coralScorerSubsystem.ejectCommand());
+      driverController.leftBumper().onTrue(coralScorerSubsystem.toggleIntakeSpeedCommand());
+    } else if(currentRobotMode == RobotMode.ALGAE){
+      driveSubsystem.setDefaultCommand(
+        driveSubsystem.arcadeDrive(
+            () -> driverController.getLeftY(), () -> driverController.getRightX()));
 
-    driverController
-        .y()
-        .whileTrue(
-            algaeScorerSubsystem.setRollerCommand(AlgaeScorerConstants.INTAKE_SPEED_PERCENT));
+      driverController.rightTrigger().whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
+      driverController.leftTrigger().whileTrue(algaeScorerSubsystem.outakeAlgaeCommand());
+      driverController.rightBumper().onTrue(algaeScorerSubsystem.togglePivotCommand());
+    }
 
-    driverController.b().whileTrue(algaeScorerSubsystem.OutakeAlgaeCommand());
-
-    driverController
-        .a()
-        .onTrue(
-            algaeScorerSubsystem.setIntakeAngleCommand(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE));
+    driverController.a().onTrue(Commands.runOnce(() -> toggleRobotMode(), getRequiredSubsystem()));
   }
 
   /**

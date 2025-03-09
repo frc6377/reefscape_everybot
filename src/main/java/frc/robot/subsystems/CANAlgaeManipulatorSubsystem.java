@@ -191,23 +191,23 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   }
 
   public Command setIntakeAngleCommand(Angle intakeAngle) {
-    return run(() -> setPivotAngle(intakeAngle));
+    return run(() -> setPivotAngle(intakeAngle.plus(Degrees.of(5))));
   }
 
-  public Command OutakeAlgaeCommand() {
+  public Command outakeAlgaeCommand() {
     return runEnd(
         () -> setRoller(AlgaeScorerConstants.OUTAKE_TAKE_SPEED_PERCENT), () -> setRoller(0.0));
   }
 
   public Command intakeAlgaeCommand() {
-    return runOnce(() -> setPivotAngle(AlgaeScorerConstants.PIVOT_INTAKE_ANGLE))
-        .andThen(run(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT)))
-        .finallyDo(
-            () -> {
-              setPivotAngle(AlgaeScorerConstants.PIVOT_STOW_ANGLE);
-              setRoller(0.0);
-            });
+    return runEnd(
+        () -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT), () -> setRoller(0.0));
   }
+
+  public Command stopRoller() {
+    return runEnd(() -> setRoller(0.0), () -> setRoller(0.0));
+  }
+
 
   public Command setRollerCommand(double speed) {
     return Commands.startEnd(() -> setRoller(speed), () -> setRoller(0), this);

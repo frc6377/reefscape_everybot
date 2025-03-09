@@ -94,8 +94,8 @@ public final class Constants {
 
     public static final int ENCODER_RESOLUTION = 2048;
 
-    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(80);
-    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(30);
+    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(75);
+    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(35);
 
     public static double INTAKE_SPEED_PERCENT = 0.3;
     public static double OUTAKE_TAKE_SPEED_PERCENT = -0.3;
