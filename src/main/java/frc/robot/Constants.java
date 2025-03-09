@@ -97,11 +97,11 @@ public final class Constants {
 
     public static final int ENCODER_RESOLUTION = 2048;
 
-    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(70);
+    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(80);
     public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(30);
 
     public static double INTAKE_SPEED_PERCENT = 0.3;
-    public static double OUTAKE_TAKE_SPEED_PERCENT = -0.3;
+    public static double OUTAKE_TAKE_SPEED_PERCENT = -0.4;
 
     public static final Mass ARM_MASS = Pounds.of(7.2172536);
     public static final Distance ARM_LENGTH = Inches.of(22.33);

@@ -110,10 +110,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
 
-    rightLeader.setInverted(true);
+    rightLeader.setInverted(false);
     rightFollower.setInverted(InvertType.FollowMaster);
 
-    leftLeader.setInverted(false);
+    leftLeader.setInverted(true);
     leftFollower.setInverted(InvertType.FollowMaster);
 
     leftLeader.setNeutralMode(NeutralMode.Brake);
@@ -289,6 +289,26 @@ public class CANDriveSubsystem extends SubsystemBase {
   // Telemetry Commands
   public Command arcadeDrive(DoubleSupplier forward, DoubleSupplier rotation) {
     return run(() -> diffDrive.arcadeDrive(forward.getAsDouble(), rotation.getAsDouble()));
+  }
+
+  public Command coralDrivetrain() {
+    return run(
+        () -> {
+          leftLeader.setInverted(true);
+          leftFollower.setInverted(InvertType.FollowMaster);
+          rightLeader.setInverted(false);
+          rightFollower.setInverted(InvertType.FollowMaster);
+        });
+  }
+
+  public Command algaeDrivetrain() {
+    return run(
+        () -> {
+          leftLeader.setInverted(false);
+          leftFollower.setInverted(InvertType.FollowMaster);
+          rightLeader.setInverted(true);
+          rightFollower.setInverted(InvertType.FollowMaster);
+        });
   }
 
   public Command stopRobotCommand() {

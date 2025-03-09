@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
@@ -45,14 +44,14 @@ public class RobotContainer {
   // The autonomous chooser
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private static boolean coralMode = false;
-
+  public boolean coralMode = true;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     registerAutoCommands();
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureBindings();
+    Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
   }
 
   /**
@@ -73,12 +72,6 @@ public class RobotContainer {
   }
 
   public void configureBindings() {
-    driveSubsystem.setDefaultCommand(
-        driveSubsystem.arcadeDrive(
-            () ->
-                cubicCurve(
-                    () -> -driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY),
-            () -> -driverController.getRightX()));
 
     // Coral Mode Buttons
     driverController
@@ -113,10 +106,23 @@ public class RobotContainer {
         .a()
         .onTrue(
             Commands.runOnce(
-                () -> {
-                  coralMode = !coralMode;
-                  Logger.recordOutput("Mode/Score Mode", coralMode);
-                }));
+                    () -> {
+                      coralMode = !coralMode;
+                      Logger.recordOutput(
+                          "Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
+                    })
+                .andThen(
+                    () -> {
+                      if (coralMode) {
+                        driveSubsystem.coralDrivetrain();
+                      } else {
+                        driveSubsystem.algaeDrivetrain();
+                      }
+                    }));
+
+    driveSubsystem.setDefaultCommand(
+        driveSubsystem.arcadeDrive(
+            () -> driverController.getLeftY(), () -> driverController.getRightX()));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {
