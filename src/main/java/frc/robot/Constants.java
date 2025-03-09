@@ -94,8 +94,8 @@ public final class Constants {
 
     public static final int ENCODER_RESOLUTION = 2048;
 
-    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(75);
-    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(35);
+    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(70);
+    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(30);
 
     public static double INTAKE_SPEED_PERCENT = 0.3;
     public static double OUTAKE_TAKE_SPEED_PERCENT = -0.3;
@@ -107,7 +107,7 @@ public final class Constants {
     public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);
     public static final double GEARING = 42 / 22 * 45;
-    public static final Angle PIVOT_ANGLE_DEADBAND = Degrees.of(5);
+    public static final Angle PIVOT_ANGLE_DEADBAND = Degrees.of(2);
 
     public final class PivotPID {
       public static final double p = 0.015;
@@ -116,13 +116,9 @@ public final class Constants {
     }
 
     public final class PivotFeedForward {
-      // Numbers from recalc - slightly inaccurate
       public static final double kg = 0.0001;
       public static final double kv = 0.0;
       public static final double ks = 0.0;
-      // public static final double kg = 0;
-      // public static final double kv = 0;
-      // public static final double ks = 0;
     }
   }
 }

@@ -191,7 +191,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
   }
 
   public Command setIntakeAngleCommand(Angle intakeAngle) {
-    return run(() -> setPivotAngle(intakeAngle.plus(Degrees.of(5))));
+    return run(() -> setPivotAngle(intakeAngle));
   }
 
   public Command outakeAlgaeCommand() {
