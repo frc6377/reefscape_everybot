@@ -79,8 +79,6 @@ public class RobotContainer {
                 cubicCurve(
                     () -> -driverController.getLeftY(), DriveConstants.CONTROL_CURVE_INTENSITY),
             () -> -driverController.getRightX()));
-          
-    
 
     // Coral Mode Buttons
     driverController
