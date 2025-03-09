@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -39,7 +38,6 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Robot;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-
 
 public class CANDriveSubsystem extends SubsystemBase {
   private final VictorSPX leftLeader;
@@ -243,15 +241,15 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightEncoderRate = rightEncoder.getRate();
     gyroHeading = gyro.getRotation2d();
 
-    Logger.recordOutput("Left Encoder Speed", leftEncoderRate);
-    Logger.recordOutput("Right EncoderSpeed", rightEncoderRate);
+    Logger.recordOutput("Drive - Left Encoder Speed", leftEncoderRate);
+    Logger.recordOutput("Drive - Right EncoderSpeed", rightEncoderRate);
     Logger.recordOutput("Gyro Heading", gyroHeading);
 
-
     Logger.recordOutput(
-        "leftMotorInput", leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
+        "Drive - leftMotorInput",
+        leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     Logger.recordOutput(
-        "rightMotorInput",
+        "Drive - rightMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     Logger.recordOutput("Gyro", gyro.getAccumGyroZ().getValue().in(Degrees));
     position =

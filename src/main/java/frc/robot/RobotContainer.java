@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -72,16 +74,20 @@ public class RobotContainer {
 
     driverController.leftBumper().onTrue(coralScorerSubsystem.toggleIntakeSpeedCommand());
 
+    driverController.rightBumper().onTrue(algaeScorerSubsystem.togglePivotCommand());
+
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
-    driverController.x().onTrue(driveSubsystem.zeroOdometry());
+    driverController.x().onTrue(algaeScorerSubsystem.setIntakeAngleCommand(Degrees.of(0.0)));
 
     driverController
         .y()
         .whileTrue(
             algaeScorerSubsystem.setRollerCommand(AlgaeScorerConstants.INTAKE_SPEED_PERCENT));
+
+    driverController.b().whileTrue(algaeScorerSubsystem.OutakeAlgaeCommand());
 
     driverController
         .a()

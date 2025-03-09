@@ -41,8 +41,8 @@ public class CANCoralScorerSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Coral Motor Ouput Percent", rollerMotor.getMotorOutputPercent());
-    Logger.recordOutput("Coral Eject Speed", intakeSpeed);
+    Logger.recordOutput("Coral  - Motor Ouput Percent", rollerMotor.getMotorOutputPercent());
+    Logger.recordOutput("Coral  - Eject Speed", intakeSpeed);
   }
 
   // Run Roller at given speed
