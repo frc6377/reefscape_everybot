@@ -230,7 +230,7 @@ public class CANDriveSubsystem extends SubsystemBase {
         relativeSpeeds.vxMetersPerSecond
             / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
         relativeSpeeds.omegaRadiansPerSecond
-            /DriveConstants.MAX_ROTATIONAL_VELOCITY.in(RadiansPerSecond));
+            / DriveConstants.MAX_ROTATIONAL_VELOCITY.in(RadiansPerSecond));
   }
 
   @Override
@@ -259,8 +259,9 @@ public class CANDriveSubsystem extends SubsystemBase {
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
     Logger.recordOutput("Robot Position", position);
-    
-    Logger.recordOutput("Drive - Rotational Velocity(rad/s)", getCurrentSpeeds().omegaRadiansPerSecond);
+
+    Logger.recordOutput(
+        "Drive - Rotational Velocity(rad/s)", getCurrentSpeeds().omegaRadiansPerSecond);
     Logger.recordOutput("Drive - Linear Velocity(m/s)", getCurrentSpeeds().vxMetersPerSecond);
   }
 
