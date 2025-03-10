@@ -6,22 +6,26 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularMomentum;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
@@ -57,14 +61,15 @@ public final class Constants {
     public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(3.75);
     // 1m has 2.75 with 4.5 | 3.5 with 3.87096
     // 2m has 1.375 with 4.5
+    public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = RadiansPerSecond.of(0.875);
 
     public static final double WHEEL_COF = 0.975;
 
     public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
-    public static final AngularMomentum MOI = KilogramMetersSquaredPerSecond.of(7.0986919264);
+    public static final AngularMomentum MOI = KilogramMetersSquaredPerSecond.of(8.3877742328);
 
-    public static final Mass MASS = Kilograms.of(48.885739278871);
+    public static final Mass MASS = Pounds.of(120.194);
 
     public static final double ENCODER_RESOLUTION = 2048;
 

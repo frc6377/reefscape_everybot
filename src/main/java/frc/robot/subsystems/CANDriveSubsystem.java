@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -228,7 +229,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     diffDrive.arcadeDrive(
         relativeSpeeds.vxMetersPerSecond
             / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
-        relativeSpeeds.omegaRadiansPerSecond);
+        relativeSpeeds.omegaRadiansPerSecond
+            /DriveConstants.MAX_ROTATIONAL_VELOCITY.in(RadiansPerSecond));
   }
 
   @Override
@@ -251,12 +253,15 @@ public class CANDriveSubsystem extends SubsystemBase {
     Logger.recordOutput(
         "Drive - rightMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
-    Logger.recordOutput("Gyro", gyro.getAccumGyroZ().getValue().in(Degrees));
+    Logger.recordOutput("Gyro Yaw", gyro.getYaw().getValue().in(Degrees));
     position =
         driveOdometry.update(
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
     Logger.recordOutput("Robot Position", position);
+    
+    Logger.recordOutput("Drive - Rotational Velocity(rad/s)", getCurrentSpeeds().omegaRadiansPerSecond);
+    Logger.recordOutput("Drive - Linear Velocity(m/s)", getCurrentSpeeds().vxMetersPerSecond);
   }
 
   @Override
