@@ -63,7 +63,7 @@ public final class Constants {
 
     public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
-    public static final AngularMomentum MOI = KilogramMetersSquaredPerSecond.of(8.3877742328);
+    public static final AngularMomentum MOI = KilogramMetersSquaredPerSecond.of(4.9192844085);
 
     public static final Mass MASS = Pounds.of(120.194);
 
