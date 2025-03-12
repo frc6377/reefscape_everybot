@@ -122,8 +122,8 @@ public class RobotContainer {
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
-            () -> coralMode ? -driverController.getLeftY() : driverController.getLeftY(),
-            () -> -driverController.getRightX()));
+            () -> coralMode ? driverController.getLeftY() : -driverController.getLeftY(),
+            () -> driverController.getRightX()));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {

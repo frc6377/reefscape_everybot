@@ -6,12 +6,12 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -55,10 +55,9 @@ public final class Constants {
 
     public static final Distance WHEEL_DIAMETER_METERS = Meters.of(0.15240);
 
-    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(3.75);
-    // 1m has 2.75 with 4.5 | 3.5 with 3.87096
-    // 2m has 1.375 with 4.5
-    public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = RadiansPerSecond.of(0.875);
+    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(2);
+
+    public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = DegreesPerSecond.of(30);
 
     public static final double WHEEL_COF = 0.975;
 
