@@ -106,24 +106,15 @@ public class RobotContainer {
         .a()
         .onTrue(
             Commands.runOnce(
-                    () -> {
-                      coralMode = !coralMode;
-                      Logger.recordOutput(
-                          "Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
-                    })
-                .andThen(
-                    () -> {
-                      if (coralMode) {
-                        driveSubsystem.coralDrivetrain();
-                      } else {
-                        driveSubsystem.algaeDrivetrain();
-                      }
-                    }));
+                () -> {
+                  coralMode = !coralMode;
+                  Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
+                }));
 
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> coralMode ? driverController.getLeftY() : -driverController.getLeftY(),
-            () -> driverController.getRightX()));
+            () -> -driverController.getRightX()));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {

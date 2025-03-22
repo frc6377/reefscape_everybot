@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -177,8 +176,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     // Configure AutoBuilder last
     AutoBuilder.configure(
         this::getPosition, // Robot pose supplier
-        this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
-        // pose)
+        this::resetOdometry, // Method to reset odometry
         this::getCurrentSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         (speeds) ->
             driveRobotRelative(
@@ -229,8 +227,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     diffDrive.arcadeDrive(
         relativeSpeeds.vxMetersPerSecond
             / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
-        relativeSpeeds.omegaRadiansPerSecond
-            / DriveConstants.MAX_ROTATIONAL_VELOCITY.in(RadiansPerSecond));
+        relativeSpeeds.omegaRadiansPerSecond);
   }
 
   @Override
@@ -256,7 +253,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     Logger.recordOutput("Gyro Yaw", gyro.getYaw().getValue().in(Degrees));
     position =
         driveOdometry.update(
-            gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
+            gyro.getRotation2d(), -leftEncoder.getDistance(), -rightEncoder.getDistance());
 
     Logger.recordOutput("Robot Position", position);
 
@@ -328,8 +325,4 @@ public class CANDriveSubsystem extends SubsystemBase {
   public Command zeroOdometry() {
     return Commands.runOnce(() -> zeroPosition(), this);
   }
-
-  // public Command resetPathPose{
-
-  // }
 }
