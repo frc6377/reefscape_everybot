@@ -55,7 +55,7 @@ public final class Constants {
 
     public static final Distance WHEEL_DIAMETER_METERS = Meters.of(0.15240);
 
-    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(3.5);
+    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(2);
 
     public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = DegreesPerSecond.of(30);
 

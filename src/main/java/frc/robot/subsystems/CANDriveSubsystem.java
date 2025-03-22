@@ -297,7 +297,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     return run(() -> diffDrive.arcadeDrive(forward.getAsDouble(), rotation.getAsDouble()));
   }
 
-  public Command algaeDrivetrain() {
+  public Command coralDrivetrain() {
     return run(
         () -> {
           leftLeader.setInverted(true);
@@ -307,7 +307,7 @@ public class CANDriveSubsystem extends SubsystemBase {
         });
   }
 
-  public Command coralDrivetrain() {
+  public Command algaeDrivetrain() {
     return run(
         () -> {
           leftLeader.setInverted(false);
