@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -96,13 +96,9 @@ public class CANDriveSubsystem extends SubsystemBase {
             DriveConstants.RIGHT_DRIVE_ENCODER_A, DriveConstants.RIGHT_DRIVE_ENCODER_B, true);
 
     leftEncoder.setDistancePerPulse(
-        Math.PI
-            * DriveConstants.WHEEL_DIAMETER_METERS.in(Meter)
-            / DriveConstants.ENCODER_RESOLUTION);
+        Math.PI * DriveConstants.WHEEL_DIAMETER.in(Meter) / DriveConstants.ENCODER_RESOLUTION);
     rightEncoder.setDistancePerPulse(
-        Math.PI
-            * DriveConstants.WHEEL_DIAMETER_METERS.in(Meter)
-            / DriveConstants.ENCODER_RESOLUTION);
+        Math.PI * DriveConstants.WHEEL_DIAMETER.in(Meter) / DriveConstants.ENCODER_RESOLUTION);
 
     leftEncoderSim = new EncoderSim(leftEncoder);
     rightEncoderSim = new EncoderSim(rightEncoder);
@@ -124,12 +120,12 @@ public class CANDriveSubsystem extends SubsystemBase {
     gyro = new Pigeon2(DriveConstants.PIGEON_DEVICE_ID);
     gyroSim = new Pigeon2SimState(gyro);
 
-    kinematics = new DifferentialDriveKinematics(DriveConstants.TRACK_WIDTH_METERS.in(Meter));
+    kinematics = new DifferentialDriveKinematics(DriveConstants.TRACK_WIDTH.in(Meter));
 
     driveModuleConfig =
         new ModuleConfig(
-            DriveConstants.WHEEL_DIAMETER_METERS.in(Meter) / 2,
-            DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
+            DriveConstants.WHEEL_DIAMETER.in(Meter) / 2,
+            DriveConstants.MAX_DRIVE_VELOCITY.in(MetersPerSecond),
             DriveConstants.WHEEL_COF,
             DCMotor.getCIM(2).withReduction(DriveConstants.GEARING),
             DriveConstants.MOTOR_CURRENT_LIMIT.in(Amps),
@@ -146,10 +142,10 @@ public class CANDriveSubsystem extends SubsystemBase {
           new DifferentialDrivetrainSim(
               DCMotor.getCIM(2),
               DriveConstants.GEARING,
-              DriveConstants.MOI.in(KilogramMetersSquaredPerSecond),
+              DriveConstants.MOI.in(KilogramSquareMeters),
               DriveConstants.MASS.in(Kilograms),
-              DriveConstants.WHEEL_DIAMETER_METERS.in(Meter) / 2,
-              DriveConstants.TRACK_WIDTH_METERS.in(Meter),
+              DriveConstants.WHEEL_DIAMETER.in(Meter) / 2,
+              DriveConstants.TRACK_WIDTH.in(Meter),
               null);
     }
     // Create new odometry object
@@ -165,9 +161,9 @@ public class CANDriveSubsystem extends SubsystemBase {
       config =
           new RobotConfig(
               DriveConstants.MASS.in(Kilograms),
-              DriveConstants.MOI.in(KilogramMetersSquaredPerSecond),
+              DriveConstants.MOI.in(KilogramSquareMeters),
               driveModuleConfig,
-              DriveConstants.TRACK_WIDTH_METERS.in(Meter));
+              DriveConstants.TRACK_WIDTH.in(Meter));
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
@@ -225,8 +221,7 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
     diffDrive.arcadeDrive(
-        relativeSpeeds.vxMetersPerSecond
-            / DriveConstants.MAX_DRIVE_VELOCITY_MPS.in(MetersPerSecond),
+        relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY.in(MetersPerSecond),
         relativeSpeeds.omegaRadiansPerSecond);
   }
 
@@ -234,7 +229,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   public void periodic() {
 
     wheelSpeeds = new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
-    wheelSpeeds.desaturate(DriveConstants.MAX_DRIVE_VELOCITY_MPS);
+    wheelSpeeds.desaturate(DriveConstants.MAX_DRIVE_VELOCITY);
 
     leftEncoderRate = leftEncoder.getRate();
     rightEncoderRate = rightEncoder.getRate();

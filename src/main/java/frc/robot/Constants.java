@@ -8,20 +8,19 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularMomentum;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 
@@ -49,13 +48,13 @@ public final class Constants {
 
     public static final int PIGEON_DEVICE_ID = 5;
 
-    public static final Distance TRACK_WIDTH_METERS = Meters.of(0.5715);
+    public static final Distance TRACK_WIDTH = Inches.of(22.5);
 
     public static final double GEARING = 8.45;
 
-    public static final Distance WHEEL_DIAMETER_METERS = Meters.of(0.15240);
+    public static final Distance WHEEL_DIAMETER = Inches.of(6);
 
-    public static final LinearVelocity MAX_DRIVE_VELOCITY_MPS = MetersPerSecond.of(2);
+    public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(4);
 
     public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = DegreesPerSecond.of(30);
 
@@ -63,7 +62,7 @@ public final class Constants {
 
     public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
-    public static final AngularMomentum MOI = KilogramMetersSquaredPerSecond.of(4.9192844085);
+    public static final MomentOfInertia MOI = KilogramSquareMeters.of(7.80899009276);
 
     public static final Mass MASS = Pounds.of(120.194);
 
@@ -106,7 +105,7 @@ public final class Constants {
 
     public static final Mass ARM_MASS = Pounds.of(7.2172536);
     public static final Distance ARM_LENGTH = Inches.of(22.33);
-    public static final AngularMomentum ARM_MOI = KilogramMetersSquaredPerSecond.of(0.0715890237);
+    public static final MomentOfInertia ARM_MOI = KilogramSquareMeters.of(0.0715890237);
 
     public static final Current ROLLER_MOTOR_CURRENT_LIMIT = Amps.of(40);
     public static final Voltage ROLLER_MOTOR_VOLTAGE_COMP = Volts.of(12);

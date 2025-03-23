@@ -7,7 +7,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.KilogramMetersSquaredPerSecond;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -127,10 +127,10 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
         new SingleJointedArmSim(
             DCMotor.getCIM(1),
             AlgaeScorerConstants.GEARING,
-            AlgaeScorerConstants.ARM_MOI.in(KilogramMetersSquaredPerSecond),
+            AlgaeScorerConstants.ARM_MOI.in(KilogramSquareMeters),
             AlgaeScorerConstants.ARM_LENGTH.in(Meters),
             0.0,
-            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians) + 1,
+            AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians),
             true,
             AlgaeScorerConstants.PIVOT_STOW_ANGLE.in(Radians));
   }
