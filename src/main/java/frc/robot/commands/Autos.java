@@ -4,6 +4,29 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.CANDriveSubsystem;
+
 public final class Autos {
-  // Example autonomous command which drives forward for 1 second.
+
+  public Command OneMeterAuto(CANDriveSubsystem drive) {
+    return drive.driveXAxis(1);
+  }
+
+  public Command NinetyDegreeAuto(CANDriveSubsystem drive) {
+    return drive.turnCommand(90);
+  }
+
+  public Command HalfMeterSquare(CANDriveSubsystem drive) {
+    return Commands.sequence(
+        drive.driveXAxis(1),
+        drive.turnCommand(90),
+        drive.driveXAxis(1),
+        drive.turnCommand(90),
+        drive.driveXAxis(1),
+        drive.turnCommand(90),
+        drive.driveXAxis(1),
+        drive.turnCommand(90));
+  }
 }

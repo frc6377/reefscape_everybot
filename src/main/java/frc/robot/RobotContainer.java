@@ -6,11 +6,14 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
@@ -27,31 +30,38 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // The robot's subsystems
-  private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
+  public final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
   private final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
   private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
+
+  // Autos Class
+  Autos hardAutos = new Autos();
 
   // The driver's controller
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
 
-  // The operator's controller
-  private final CommandXboxController operatorController =
-      new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
-
   // Registering Auto Commands
   // The autonomous chooser
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final SendableChooser<Command> hardAutoChooser;
 
   public boolean coralMode = true;
+  public boolean usingPP = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    registerAutoCommands();
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    if (AutoBuilder.isConfigured()) {
+      autoChooser = new LoggedDashboardChooser<>("PP Auto Choices", AutoBuilder.buildAutoChooser());
+    } else {
+      autoChooser = null;
+    }
+
+    hardAutoChooser = new SendableChooser<>();
+    addCommandsFromAutos();
+
     configureBindings();
-    Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
   }
 
   /**
@@ -121,12 +131,27 @@ public class RobotContainer {
     return intensity * Math.pow(input.getAsDouble(), 3) + (1 - intensity) * input.getAsDouble();
   }
 
+  private void addCommandsFromAutos() {
+    hardAutoChooser.addOption("One Meter Auto", hardAutos.OneMeterAuto(driveSubsystem));
+    hardAutoChooser.addOption("Half Meter Auto", hardAutos.HalfMeterSquare(driveSubsystem));
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+
+    if (usingPP) {
+      if (autoChooser != null) {
+        return autoChooser.get();
+      } else {
+        DriverStation.reportError("Autobuilder was not configured and No Hard Autos", true);
+        return null;
+      }
+    } else {
+      return hardAutoChooser.getSelected();
+    }
   }
 }

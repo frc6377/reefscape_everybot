@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -53,6 +54,9 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final DifferentialDrive diffDrive;
   private final DifferentialDriveOdometry driveOdometry;
 
+  private final PIDController drivePID;
+  private final PIDController rotatePID;
+
   private DifferentialDriveKinematics kinematics;
 
   private Pose2d position;
@@ -61,9 +65,6 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   private double leftEncoderRate = 0;
   private double rightEncoderRate = 0;
-
-  private double leftEncoderRevo;
-  private double rightEncoderRevo;
 
   private Rotation2d gyroHeading = new Rotation2d(0);
 
@@ -153,7 +154,12 @@ public class CANDriveSubsystem extends SubsystemBase {
         new DifferentialDriveOdometry(
             gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
-    defaultPathPlannerSetup();
+    rotatePID =
+        new PIDController(
+            DriveConstants.RotatePID.kp, DriveConstants.RotatePID.ki, DriveConstants.RotatePID.kd);
+    drivePID =
+        new PIDController(
+            DriveConstants.DrivePID.kp, DriveConstants.DrivePID.ki, DriveConstants.DrivePID.kd);
   }
 
   public void defaultPathPlannerSetup() {
@@ -206,6 +212,10 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   // Get Current Speed
   public ChassisSpeeds getCurrentSpeeds() {
+    Logger.recordOutput(
+        "Drive/Forward Speed", kinematics.toChassisSpeeds(wheelSpeeds).vxMetersPerSecond);
+    Logger.recordOutput(
+        "Drive/Rot Speed - Radians", kinematics.toChassisSpeeds(wheelSpeeds).omegaRadiansPerSecond);
     return kinematics.toChassisSpeeds(wheelSpeeds);
   }
 
@@ -221,7 +231,7 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public void driveRobotRelative(ChassisSpeeds relativeSpeeds) {
     diffDrive.arcadeDrive(
-        relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY.in(MetersPerSecond),
+        -relativeSpeeds.vxMetersPerSecond / DriveConstants.MAX_DRIVE_VELOCITY.in(MetersPerSecond),
         relativeSpeeds.omegaRadiansPerSecond);
   }
 
@@ -235,15 +245,15 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightEncoderRate = rightEncoder.getRate();
     gyroHeading = gyro.getRotation2d();
 
-    Logger.recordOutput("Drive - Left Encoder Speed", leftEncoderRate);
-    Logger.recordOutput("Drive - Right EncoderSpeed", rightEncoderRate);
+    Logger.recordOutput("Drive/Left Encoder Speed", leftEncoderRate);
+    Logger.recordOutput("Drive/Right EncoderSpeed", rightEncoderRate);
     Logger.recordOutput("Gyro Heading", gyroHeading);
 
     Logger.recordOutput(
-        "Drive - leftMotorInput",
+        "Drive/leftMotorInput",
         leftLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     Logger.recordOutput(
-        "Drive - rightMotorInput",
+        "Drive/rightMotorInput",
         rightLeader.getMotorOutputPercent() * RobotController.getBatteryVoltage());
     Logger.recordOutput("Gyro Yaw", gyro.getYaw().getValue().in(Degrees));
     position =
@@ -253,8 +263,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     Logger.recordOutput("Robot Position", position);
 
     Logger.recordOutput(
-        "Drive - Rotational Velocity(rad/s)", getCurrentSpeeds().omegaRadiansPerSecond);
-    Logger.recordOutput("Drive - Linear Velocity(m/s)", getCurrentSpeeds().vxMetersPerSecond);
+        "Drive/Rotational Velocity(rads)",
+        kinematics.toChassisSpeeds(wheelSpeeds).omegaRadiansPerSecond);
+    Logger.recordOutput(
+        "Drive/Linear Velocity(ms)", kinematics.toChassisSpeeds(wheelSpeeds).vxMetersPerSecond);
   }
 
   @Override
@@ -319,5 +331,46 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public Command zeroOdometry() {
     return Commands.runOnce(() -> zeroPosition(), this);
+  }
+
+  public Command turnCommand(double targetAngle) {
+    rotatePID.setSetpoint(targetAngle);
+    return run(() -> {
+          double currentAngle = 360 % gyro.getYaw().getValue().in(Degrees);
+          double PIDOutput = rotatePID.calculate(currentAngle, rotatePID.getSetpoint());
+          arcadeDrive(() -> 0.0, () -> PIDOutput);
+        })
+        .until(() -> Math.abs(360 % gyro.getYaw().getValue().in(Degrees) - targetAngle) < 1)
+        .withName("turnCommand");
+  }
+
+  public Command driveXAxis(double targetMeters) {
+    return run(() -> {
+          Pose2d currentPose = driveOdometry.getPoseMeters();
+
+          double targetX = currentPose.getX() + targetMeters * currentPose.getRotation().getCos();
+          double targetY = currentPose.getY() + targetMeters * currentPose.getRotation().getSin();
+          Pose2d targetPose = new Pose2d(targetX, targetY, currentPose.getRotation());
+
+          double distanceError =
+              currentPose.getTranslation().getDistance(targetPose.getTranslation());
+
+          double pidOutput = drivePID.calculate(distanceError, 0);
+          arcadeDrive(() -> pidOutput, () -> 0.0);
+        })
+        .until(
+            () -> {
+              Pose2d currentPose = driveOdometry.getPoseMeters();
+              double targetX =
+                  currentPose.getX() + targetMeters * currentPose.getRotation().getCos();
+              double targetY =
+                  currentPose.getY() + targetMeters * currentPose.getRotation().getSin();
+              Pose2d targetPose = new Pose2d(targetX, targetY, currentPose.getRotation());
+              double distanceRemaining =
+                  currentPose.getTranslation().getDistance(targetPose.getTranslation());
+
+              return distanceRemaining < 0.02;
+            })
+        .withName("driveXAxisCommand");
   }
 }

@@ -173,10 +173,10 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Algae - Pivot Setpoint", pivotPID.getSetpoint());
-    Logger.recordOutput("Algae - Pivot Motor Output Percent", pivotMotor.getMotorOutputPercent());
-    Logger.recordOutput("Algae - PivotAngle", pivotEncoder.getDistance());
-    Logger.recordOutput("Algae - PivotMotorVoltage", pivotMotor.getMotorOutputVoltage());
+    Logger.recordOutput("Algae/Pivot Setpoint", pivotPID.getSetpoint());
+    Logger.recordOutput("Algae/Pivot Motor Output Percent", pivotMotor.getMotorOutputPercent());
+    Logger.recordOutput("Algae/PivotAngle", pivotEncoder.getDistance());
+    Logger.recordOutput("Algae/PivotMotorVoltage", pivotMotor.getMotorOutputVoltage());
     calculatePivotPID();
   }
 

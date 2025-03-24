@@ -6,11 +6,11 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -54,9 +54,13 @@ public final class Constants {
 
     public static final Distance WHEEL_DIAMETER = Inches.of(6);
 
-    public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(4);
+    public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(3.9);
 
-    public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = DegreesPerSecond.of(30);
+    public static final LinearVelocity MIN_DRIVE_VELOCITY = MetersPerSecond.of(0);
+
+    public static final AngularVelocity MAX_ROTATIONAL_VELOCITY = RadiansPerSecond.of(12.4);
+
+    public static final AngularVelocity MIN_ROTATIONAL_VELOCITY = RadiansPerSecond.of(0);
 
     public static final double WHEEL_COF = 0.975;
 
@@ -69,6 +73,21 @@ public final class Constants {
     public static final double ENCODER_RESOLUTION = 2048;
 
     public static final double CONTROL_CURVE_INTENSITY = 0.5;
+
+    public static final class DrivePID {
+      public static final double kp = 1;
+      public static final double ki = 1;
+      public static final double kd = 1;
+    }
+
+    public static final class RotatePID {
+      public static final double kp = 0;
+      public static final double ki = 0;
+      public static final double kd = 0;
+    }
+
+    public static final double minPower = 0.3;
+    public static final double debounce = 1;
   }
 
   public static final class CoralScorerConstants {
@@ -87,7 +106,6 @@ public final class Constants {
     public static final int OPERATOR_CONTROLLER_PORT = 1;
   }
 
-  // FIXME: AlgaeScorerConstants is completely wrong, all numbers are placeholders
   public static final class AlgaeScorerConstants {
     public static final int PIVOT_MOTOR_ID = 5;
     public static final int ROLLER_MOTOR_ID = 8;
