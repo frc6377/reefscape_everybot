@@ -359,8 +359,12 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public Command goToRelativePose(Pose2d targetPose){
-    //Add Code Here
-    return Commands.run(null, null);
-    
+      double xPose = targetPose.getX();
+      double yPose = targetPose.getY();
+
+      double zPose = Math.sqrt((Math.pow(xPose, 2))*(Math.pow(yPose, 2)));
+
+      double angle = Math.atan2(yPose, xPose);
+      return Commands.sequence(turnCommand(angle), driveCommand(zPose), turnCommand(targetPose.getRotation().getDegrees()));
   }
 }

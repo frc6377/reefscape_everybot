@@ -6,6 +6,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -125,6 +128,10 @@ public class RobotContainer {
         driveSubsystem.arcadeDrive(
             () -> coralMode ? driverController.getLeftY() : -driverController.getLeftY(),
             () -> -driverController.getRightX()));
+      
+    driverController.povUp().onTrue(Commands.run(() -> driveSubsystem.driveCommand(1.00)));
+    driverController.povRight().onTrue(Commands.run(() -> driveSubsystem.turnCommand(45.00)));
+    driverController.povDown().onTrue(Commands.run(() -> driveSubsystem.goToRelativePose(new Pose2d(0.5,0.5,new Rotation2d(45.00)))));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {
