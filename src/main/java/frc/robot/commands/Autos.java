@@ -10,23 +10,5 @@ import frc.robot.subsystems.CANDriveSubsystem;
 
 public final class Autos {
 
-  public Command OneMeterAuto(CANDriveSubsystem drive) {
-    return drive.driveXAxis(1);
-  }
-
-  public Command NinetyDegreeAuto(CANDriveSubsystem drive) {
-    return drive.turnCommand(90);
-  }
-
-  public Command HalfMeterSquare(CANDriveSubsystem drive) {
-    return Commands.sequence(
-        drive.driveXAxis(1),
-        drive.turnCommand(90),
-        drive.driveXAxis(1),
-        drive.turnCommand(90),
-        drive.driveXAxis(1),
-        drive.turnCommand(90),
-        drive.driveXAxis(1),
-        drive.turnCommand(90));
-  }
+  
 }

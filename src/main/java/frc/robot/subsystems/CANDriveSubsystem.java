@@ -334,8 +334,8 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public Command turnCommand(double targetAngle) {
-    rotatePID.setSetpoint(targetAngle);
     return run(() -> {
+        rotatePID.setSetpoint(targetAngle);
           double currentAngle = 360 % gyro.getYaw().getValue().in(Degrees);
           double PIDOutput = rotatePID.calculate(currentAngle, rotatePID.getSetpoint());
           arcadeDrive(() -> 0.0, () -> PIDOutput);
@@ -344,33 +344,22 @@ public class CANDriveSubsystem extends SubsystemBase {
         .withName("turnCommand");
   }
 
-  public Command driveXAxis(double targetMeters) {
+  public Command driveCommand(double distance){
     return run(() -> {
-          Pose2d currentPose = driveOdometry.getPoseMeters();
+      drivePID.setSetpoint(distance);
+      Pose2d currentPose = driveOdometry.getPoseMeters();
+      Pose2d targetPose = new Pose2d(currentPose.getX()+distance, currentPose.getY(), currentPose.getRotation());
+      double PIDOutput = drivePID.calculate(currentPose.getX(), targetPose.getX());
+      arcadeDrive(() -> PIDOutput, () -> 0.0);
+    }).until(() -> {
+      Pose2d currentPose = driveOdometry.getPoseMeters();
+      double error = Math.abs(drivePID.getSetpoint() - currentPose.getX());
+      return error < 0.01;
+    });
+  }
 
-          double targetX = currentPose.getX() + targetMeters * currentPose.getRotation().getCos();
-          double targetY = currentPose.getY() + targetMeters * currentPose.getRotation().getSin();
-          Pose2d targetPose = new Pose2d(targetX, targetY, currentPose.getRotation());
-
-          double distanceError =
-              currentPose.getTranslation().getDistance(targetPose.getTranslation());
-
-          double pidOutput = drivePID.calculate(distanceError, 0);
-          arcadeDrive(() -> pidOutput, () -> 0.0);
-        })
-        .until(
-            () -> {
-              Pose2d currentPose = driveOdometry.getPoseMeters();
-              double targetX =
-                  currentPose.getX() + targetMeters * currentPose.getRotation().getCos();
-              double targetY =
-                  currentPose.getY() + targetMeters * currentPose.getRotation().getSin();
-              Pose2d targetPose = new Pose2d(targetX, targetY, currentPose.getRotation());
-              double distanceRemaining =
-                  currentPose.getTranslation().getDistance(targetPose.getTranslation());
-
-              return distanceRemaining < 0.02;
-            })
-        .withName("driveXAxisCommand");
+  public Command goToRelativePose(Pose2d targetPose){
+    //Add Code Here
+    return Commands.run(null, null);
   }
 }

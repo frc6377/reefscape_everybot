@@ -132,8 +132,7 @@ public class RobotContainer {
   }
 
   private void addCommandsFromAutos() {
-    hardAutoChooser.addOption("One Meter Auto", hardAutos.OneMeterAuto(driveSubsystem));
-    hardAutoChooser.addOption("Half Meter Auto", hardAutos.HalfMeterSquare(driveSubsystem));
+    //Add autos
   }
 
   /**
