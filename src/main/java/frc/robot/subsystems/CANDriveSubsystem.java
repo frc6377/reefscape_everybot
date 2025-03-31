@@ -34,9 +34,11 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Robot;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -298,7 +300,11 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   // Telemetry Commands
   public Command arcadeDrive(DoubleSupplier forward, DoubleSupplier rotation) {
-    return run(() -> diffDrive.arcadeDrive(forward.getAsDouble(), rotation.getAsDouble()));
+    return run(
+        () -> {
+          diffDrive.arcadeDrive(forward.getAsDouble(), rotation.getAsDouble());
+          diffDrive.feed();
+        });
   }
 
   public Command coralDrivetrain() {
@@ -334,37 +340,53 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public Command turnCommand(double targetAngle) {
-    return run(() -> {
-        rotatePID.setSetpoint(targetAngle);
-          double currentAngle = 360 % gyro.getYaw().getValue().in(Degrees);
-          double PIDOutput = rotatePID.calculate(currentAngle, rotatePID.getSetpoint());
-          arcadeDrive(() -> 0.0, () -> PIDOutput);
-        })
+    return new DeferredCommand(
+            () -> {
+              rotatePID.setSetpoint(targetAngle);
+              double currentAngle = 360 % gyro.getYaw().getValue().in(Degrees);
+              double PIDOutput = rotatePID.calculate(currentAngle, rotatePID.getSetpoint());
+              return arcadeDrive(() -> 0.0, () -> PIDOutput);
+            },
+            Set.of(this))
         .until(() -> Math.abs(360 % gyro.getYaw().getValue().in(Degrees) - targetAngle) < 1)
         .withName("turnCommand");
   }
 
-  public Command driveCommand(double distance){
-    return run(() -> {
-      drivePID.setSetpoint(distance);
-      Pose2d currentPose = driveOdometry.getPoseMeters();
-      Pose2d targetPose = new Pose2d(currentPose.getX()+distance, currentPose.getY(), currentPose.getRotation());
-      double PIDOutput = drivePID.calculate(currentPose.getX(), targetPose.getX());
-      arcadeDrive(() -> PIDOutput, () -> 0.0);
-    }).until(() -> {
-      Pose2d currentPose = driveOdometry.getPoseMeters();
-      double error = Math.abs(drivePID.getSetpoint() - currentPose.getX());
-      return error < 0.01;
-    });
+  public Command driveCommand(double distance) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () -> {
+              Pose2d currentPose = driveOdometry.getPoseMeters();
+              Pose2d targetPose =
+                  new Pose2d(
+                      currentPose.getX() + distance, currentPose.getY(), currentPose.getRotation());
+              drivePID.setSetpoint(targetPose.getX());
+            },
+            this),
+        run(() -> {
+              double PIDOutput =
+                  drivePID.calculate(driveOdometry.getPoseMeters().getX(), drivePID.getSetpoint());
+              Logger.recordOutput("Drive/Drive PID Output", PIDOutput);
+              diffDrive.arcadeDrive(-PIDOutput, 0.0);
+            })
+            .until(
+                () -> {
+                  Pose2d currentPose = driveOdometry.getPoseMeters();
+                  double error = Math.abs(drivePID.getSetpoint() - currentPose.getX());
+                  return error == 0; 
+                }));
   }
 
-  public Command goToRelativePose(Pose2d targetPose){
-      double xPose = targetPose.getX();
-      double yPose = targetPose.getY();
+  public Command goToRelativePose(Pose2d targetPose) {
+    double xPose = targetPose.getX();
+    double yPose = targetPose.getY();
 
-      double zPose = Math.sqrt((Math.pow(xPose, 2))*(Math.pow(yPose, 2)));
+    double zPose = Math.sqrt((Math.pow(xPose, 2)) * (Math.pow(yPose, 2)));
 
-      double angle = Math.atan2(yPose, xPose);
-      return Commands.sequence(turnCommand(angle), driveCommand(zPose), turnCommand(targetPose.getRotation().getDegrees()));
+    double angle = Math.atan2(yPose, xPose);
+    return Commands.sequence(
+        turnCommand(angle),
+        driveCommand(zPose),
+        turnCommand(targetPose.getRotation().getDegrees()));
   }
 }

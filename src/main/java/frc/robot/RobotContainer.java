@@ -6,7 +6,6 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -121,17 +120,24 @@ public class RobotContainer {
             Commands.runOnce(
                 () -> {
                   coralMode = !coralMode;
-                  Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
                 }));
-
+    Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
             () -> coralMode ? driverController.getLeftY() : -driverController.getLeftY(),
-            () -> -driverController.getRightX()));
-      
-    driverController.povUp().onTrue(Commands.run(() -> driveSubsystem.driveCommand(1.00)));
-    driverController.povRight().onTrue(Commands.run(() -> driveSubsystem.turnCommand(45.00)));
-    driverController.povDown().onTrue(Commands.run(() -> driveSubsystem.goToRelativePose(new Pose2d(0.5,0.5,new Rotation2d(45.00)))));
+            () -> driverController.getRightX()));
+
+    driverController.povUp().whileTrue((driveSubsystem.driveCommand(1.00)));
+    driverController
+        .povRight()
+        .whileTrue(Commands.runOnce(() -> driveSubsystem.turnCommand(45.00)));
+    driverController
+        .povDown()
+        .whileTrue(
+            Commands.runOnce(
+                () ->
+                    driveSubsystem.goToRelativePose(new Pose2d(0.5, 0.5, new Rotation2d(45.00)))));
+    driverController.start().onTrue(Commands.run(() -> driveSubsystem.zeroPosition()));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {
@@ -139,7 +145,7 @@ public class RobotContainer {
   }
 
   private void addCommandsFromAutos() {
-    //Add autos
+    // Add autos
   }
 
   /**

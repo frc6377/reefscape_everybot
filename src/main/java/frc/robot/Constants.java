@@ -76,14 +76,14 @@ public final class Constants {
 
     public static final class DrivePID {
       public static final double kp = 1;
-      public static final double ki = 1;
-      public static final double kd = 1;
+      public static final double ki = 0.01;
+      public static final double kd = 0.05;
     }
 
     public static final class RotatePID {
-      public static final double kp = 0;
-      public static final double ki = 0;
-      public static final double kd = 0;
+      public static final double kp = 0.01;
+      public static final double ki = 0.01;
+      public static final double kd = 0.01;
     }
 
     public static final double minPower = 0.3;
