@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -37,9 +38,6 @@ public class RobotContainer {
   private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
 
-  // Autos Class
-  Autos hardAutos = new Autos();
-
   // The driver's controller
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -61,8 +59,7 @@ public class RobotContainer {
     }
 
     hardAutoChooser = new SendableChooser<>();
-    addCommandsFromAutos();
-
+    addHardAutos();
     configureBindings();
   }
 
@@ -75,7 +72,7 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  public void registerAutoCommands() {
+  public void PPAutoCommands() {
     HashMap<String, Command> autonCommands = new HashMap<String, Command>();
 
     autonCommands.put("ScoreCoralL1", coralScorerSubsystem.ejectCommand());
@@ -144,8 +141,10 @@ public class RobotContainer {
     return intensity * Math.pow(input.getAsDouble(), 3) + (1 - intensity) * input.getAsDouble();
   }
 
-  private void addCommandsFromAutos() {
-    // Add autos
+  private void addHardAutos() {
+    hardAutoChooser.addOption("Example Auto", Autos.exampleAuto(driveSubsystem));
+    hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
+    SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
   }
 
   /**
@@ -154,16 +153,23 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-
     if (usingPP) {
       if (autoChooser != null) {
-        return autoChooser.get();
+        return autoChooser.get(); // Use AutoBuilder if configured
       } else {
-        DriverStation.reportError("Autobuilder was not configured and No Hard Autos", true);
-        return null;
+        DriverStation.reportError(
+            "AutoBuilder is not configured. Falling back to hard autos.", false);
+        return Commands.none();
       }
     } else {
-      return hardAutoChooser.getSelected();
+      Command selectedCommand = hardAutoChooser.getSelected();
+      if (selectedCommand != null) {
+        return selectedCommand;
+      } else {
+        DriverStation.reportError(
+            "No hard auto selected. Defaulting to a 'do nothing' command.", true);
+        return Commands.none();
+      }
     }
   }
 }

@@ -75,19 +75,16 @@ public final class Constants {
     public static final double CONTROL_CURVE_INTENSITY = 0.5;
 
     public static final class DrivePID {
-      public static final double kp = 1;
+      public static final double kp = 1.3;
       public static final double ki = 0.01;
       public static final double kd = 0.05;
     }
 
     public static final class RotatePID {
-      public static final double kp = 0.01;
-      public static final double ki = 0.01;
-      public static final double kd = 0.01;
+      public static final double kp = 0.00514;
+      public static final double ki = 0.00;
+      public static final double kd = 0.00;
     }
-
-    public static final double minPower = 0.3;
-    public static final double debounce = 1;
   }
 
   public static final class CoralScorerConstants {

@@ -34,11 +34,9 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Robot;
-import java.util.Set;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -340,16 +338,33 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   public Command turnCommand(double targetAngle) {
-    return new DeferredCommand(
+    return Commands.sequence(
+        Commands.runOnce(
             () -> {
               rotatePID.setSetpoint(targetAngle);
-              double currentAngle = 360 % gyro.getYaw().getValue().in(Degrees);
-              double PIDOutput = rotatePID.calculate(currentAngle, rotatePID.getSetpoint());
-              return arcadeDrive(() -> 0.0, () -> PIDOutput);
+              Logger.recordOutput("Drive/Rotate Target Angle", targetAngle);
             },
-            Set.of(this))
-        .until(() -> Math.abs(360 % gyro.getYaw().getValue().in(Degrees) - targetAngle) < 1)
-        .withName("turnCommand");
+            this),
+        run(() -> {
+              double currentAngle = gyro.getYaw().getValue().in(Degrees);
+              double PIDOutput = rotatePID.calculate(currentAngle, rotatePID.getSetpoint());
+              Logger.recordOutput("Drive/Rotate Current Angle", currentAngle);
+              Logger.recordOutput("Drive/Rotate PID Output", PIDOutput);
+
+              // Add a minimum output threshold to ensure motors receive enough power
+              double minOutput = 0.2; // Adjust as needed
+              if (Math.abs(PIDOutput) < minOutput) {
+                PIDOutput = Math.copySign(minOutput, PIDOutput);
+              }
+
+              diffDrive.arcadeDrive(0.0, PIDOutput);
+            })
+            .until(
+                () -> {
+                  double error = Math.abs(gyro.getYaw().getValue().in(Degrees) - targetAngle);
+                  Logger.recordOutput("Rotate Error", error);
+                  return error == 0.0; // Stop when the error is less than 1 degree
+                }));
   }
 
   public Command driveCommand(double distance) {
@@ -373,7 +388,7 @@ public class CANDriveSubsystem extends SubsystemBase {
                 () -> {
                   Pose2d currentPose = driveOdometry.getPoseMeters();
                   double error = Math.abs(drivePID.getSetpoint() - currentPose.getX());
-                  return error == 0; 
+                  return error == 0;
                 }));
   }
 
@@ -381,11 +396,12 @@ public class CANDriveSubsystem extends SubsystemBase {
     double xPose = targetPose.getX();
     double yPose = targetPose.getY();
 
-    double zPose = Math.sqrt((Math.pow(xPose, 2)) * (Math.pow(yPose, 2)));
+    double zPose = Math.sqrt(Math.pow(xPose, 2) + Math.pow(yPose, 2));
 
-    double angle = Math.atan2(yPose, xPose);
+    double angle = Math.atan2(yPose, xPose) - gyro.getRotation2d().getRadians();
+
     return Commands.sequence(
-        turnCommand(angle),
+        turnCommand(Math.toDegrees(angle)),
         driveCommand(zPose),
         turnCommand(targetPose.getRotation().getDegrees()));
   }

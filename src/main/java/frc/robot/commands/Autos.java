@@ -4,4 +4,20 @@
 
 package frc.robot.commands;
 
-public final class Autos {}
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.CANDriveSubsystem;
+
+public final class Autos {
+  public static Command exampleAuto(CANDriveSubsystem driveSubsystem) {
+    return Commands.sequence(
+        driveSubsystem.driveCommand(0.5),
+        driveSubsystem.turnCommand(90),
+        driveSubsystem.driveCommand(0.5),
+        driveSubsystem.turnCommand(90));
+  }
+
+  public static Command rotateAuto(CANDriveSubsystem driveSubsystem) {
+    return driveSubsystem.turnCommand(180);
+  }
+}
