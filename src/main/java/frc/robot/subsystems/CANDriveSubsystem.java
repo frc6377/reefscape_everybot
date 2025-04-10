@@ -2,10 +2,12 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -342,6 +344,7 @@ public class CANDriveSubsystem extends SubsystemBase {
         Commands.runOnce(
             () -> {
               rotatePID.setSetpoint(targetAngle);
+              rotatePID.setTolerance(0.5);
               Logger.recordOutput("Drive/Rotate Target Angle", targetAngle);
             },
             this),
@@ -351,19 +354,18 @@ public class CANDriveSubsystem extends SubsystemBase {
               Logger.recordOutput("Drive/Rotate Current Angle", currentAngle);
               Logger.recordOutput("Drive/Rotate PID Output", PIDOutput);
 
-              // Add a minimum output threshold to ensure motors receive enough power
-              double minOutput = 0.2; // Adjust as needed
-              if (Math.abs(PIDOutput) < minOutput) {
-                PIDOutput = Math.copySign(minOutput, PIDOutput);
-              }
-
               diffDrive.arcadeDrive(0.0, PIDOutput);
             })
             .until(
                 () -> {
                   double error = Math.abs(gyro.getYaw().getValue().in(Degrees) - targetAngle);
                   Logger.recordOutput("Rotate Error", error);
-                  return error == 0.0; // Stop when the error is less than 1 degree
+                  return rotatePID.atSetpoint()
+                      && Math.abs(
+                              RadiansPerSecond.of(
+                                      kinematics.toChassisSpeeds(wheelSpeeds).omegaRadiansPerSecond)
+                                  .in(DegreesPerSecond))
+                          <= 0.0;
                 }));
   }
 

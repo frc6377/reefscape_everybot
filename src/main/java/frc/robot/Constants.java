@@ -81,9 +81,9 @@ public final class Constants {
     }
 
     public static final class RotatePID {
-      public static final double kp = 0.00514;
-      public static final double ki = 0.00;
-      public static final double kd = 0.00;
+      public static final double kp = 0.08;
+      public static final double ki = 0.0;
+      public static final double kd = 0.0070000001;
     }
   }
 

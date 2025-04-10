@@ -18,6 +18,6 @@ public final class Autos {
   }
 
   public static Command rotateAuto(CANDriveSubsystem driveSubsystem) {
-    return driveSubsystem.turnCommand(180);
+    return driveSubsystem.turnCommand(270);
   }
 }
