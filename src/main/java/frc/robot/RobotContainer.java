@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.led.CANdle;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.SignalingConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
@@ -49,6 +51,8 @@ public class RobotContainer {
 
   public static boolean coralMode = true;
   public boolean usingPP = false;
+
+  private final CANdle candle = new CANdle(SignalingConstants.kCANdle);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
