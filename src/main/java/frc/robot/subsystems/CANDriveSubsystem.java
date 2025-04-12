@@ -260,7 +260,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     Logger.recordOutput("Gyro Yaw", gyro.getYaw().getValue().in(Degrees));
     position =
         driveOdometry.update(
-            gyro.getRotation2d(), -leftEncoder.getDistance(), -rightEncoder.getDistance());
+            gyro.getRotation2d(), leftEncoder.getDistance(), rightEncoder.getDistance());
 
     Logger.recordOutput("Robot Position", position);
 

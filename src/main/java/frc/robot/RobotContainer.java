@@ -34,8 +34,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // The robot's subsystems
   public final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
-  private final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
-  private final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
+  public final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
+  public final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
 
   // The driver's controller
@@ -47,7 +47,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<Command> hardAutoChooser;
 
-  public boolean coralMode = true;
+  public static boolean coralMode = true;
   public boolean usingPP = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -146,6 +146,10 @@ public class RobotContainer {
     hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
     hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem));
     SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
+  }
+
+  public static Command switchBotMode(boolean coralModebool){
+    return Commands.runOnce(() -> coralMode = coralModebool);
   }
 
   /**
