@@ -144,6 +144,7 @@ public class RobotContainer {
   private void addHardAutos() {
     hardAutoChooser.addOption("Example Auto", Autos.exampleAuto(driveSubsystem));
     hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
+    hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem));
     SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
   }
 

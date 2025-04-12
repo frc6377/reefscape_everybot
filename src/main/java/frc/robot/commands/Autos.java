@@ -20,4 +20,8 @@ public final class Autos {
   public static Command rotateAuto(CANDriveSubsystem driveSubsystem) {
     return driveSubsystem.turnCommand(270);
   }
+
+  public static Command forwardAuto(CANDriveSubsystem driveSubsystem) {
+    return driveSubsystem.driveCommand(1);
+  }
 }
