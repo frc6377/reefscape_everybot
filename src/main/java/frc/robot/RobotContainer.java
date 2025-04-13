@@ -22,6 +22,7 @@ import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
+import frc.robot.subsystems.CANdleSignalingSubsystem;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -39,6 +40,7 @@ public class RobotContainer {
   public final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
   public final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
+  public final CANdleSignalingSubsystem signalSubsystem = new CANdleSignalingSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -52,10 +54,9 @@ public class RobotContainer {
   public static boolean coralMode = true;
   public boolean usingPP = false;
 
-  private final CANdle candle = new CANdle(SignalingConstants.kCANdle);
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    signalSubsystem.setLights(0);
     if (AutoBuilder.isConfigured()) {
       autoChooser = new LoggedDashboardChooser<>("PP Auto Choices", AutoBuilder.buildAutoChooser());
     } else {
@@ -90,11 +91,11 @@ public class RobotContainer {
     driverController
         .leftTrigger()
         .and(() -> coralMode)
-        .whileTrue(coralScorerSubsystem.intakeCommand());
+        .whileTrue(Commands.sequence(signalSubsystem.setLights(3), coralScorerSubsystem.intakeCommand(), signalSubsystem.setLights(2)));
     driverController
         .rightTrigger()
         .and(() -> coralMode)
-        .whileTrue(coralScorerSubsystem.ejectCommand());
+        .whileTrue(Commands.sequence(signalSubsystem.setLights(3), coralScorerSubsystem.ejectCommand(), signalSubsystem.setLights(2)));
     driverController
         .leftBumper()
         .and(() -> coralMode)
@@ -104,11 +105,11 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .and(() -> !coralMode)
-        .whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
+        .whileTrue(Commands.sequence(signalSubsystem.setLights(5), algaeScorerSubsystem.intakeAlgaeCommand(), signalSubsystem.setLights(4)));
     driverController
         .leftTrigger()
         .and(() -> !coralMode)
-        .whileTrue(algaeScorerSubsystem.outakeAlgaeCommand());
+        .whileTrue(Commands.sequence(signalSubsystem.setLights(5), algaeScorerSubsystem.outakeAlgaeCommand(), signalSubsystem.setLights(4)));
     driverController
         .rightBumper()
         .and(() -> !coralMode)
@@ -121,6 +122,7 @@ public class RobotContainer {
             Commands.runOnce(
                 () -> {
                   coralMode = !coralMode;
+                  signalSubsystem.setLights(coralMode ? 2 : 4);
                 }));
     Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
     driveSubsystem.setDefaultCommand(
@@ -148,7 +150,7 @@ public class RobotContainer {
   private void addHardAutos() {
     hardAutoChooser.addOption("Example Auto", Autos.exampleAuto(driveSubsystem));
     hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
-    hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem));
+    hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem, signalSubsystem));
     SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
   }
 

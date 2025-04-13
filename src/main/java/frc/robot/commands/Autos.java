@@ -4,9 +4,11 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CANDriveSubsystem;
+import frc.robot.subsystems.CANdleSignalingSubsystem;
 
 public final class Autos {
   public static Command exampleAuto(CANDriveSubsystem driveSubsystem) {
@@ -21,7 +23,9 @@ public final class Autos {
     return driveSubsystem.turnCommand(270);
   }
 
-  public static Command forwardAuto(CANDriveSubsystem driveSubsystem) {
-    return driveSubsystem.driveCommand(1);
+  public static Command forwardAuto(CANDriveSubsystem driveSubsystem, CANdleSignalingSubsystem lights) {
+    lights.setLights(0);
+    driveSubsystem.driveCommand(1);
+    return lights.setLights(1);
   }
 }
