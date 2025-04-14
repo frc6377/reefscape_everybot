@@ -148,7 +148,7 @@ public class RobotContainer {
     SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
   }
 
-  public static Command switchBotMode(boolean coralModebool){
+  public static Command switchBotMode(boolean coralModebool) {
     return Commands.runOnce(() -> coralMode = coralModebool);
   }
 

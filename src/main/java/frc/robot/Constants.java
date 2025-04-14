@@ -14,6 +14,11 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -137,6 +142,22 @@ public final class Constants {
       public static final double kg = 0.0001;
       public static final double kv = 0.0;
       public static final double ks = 0.0;
+    }
+  }
+
+  public static class VisionConstants{
+    public static final String CAMERA_NAME = "kitbot-limelight";
+    public static final int OBJECT_DETECTION_PIPELINE = 0;
+    public static final int APRILTAG_PIPELINE = 1;
+
+    public static Map<Integer, Pose2d> REEF_APRILTAG_LOCATIONS = new HashMap<>();
+    static {
+      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     }
   }
 }
