@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -74,7 +76,12 @@ public class Robot extends LoggedRobot {
     if (m_robotContainer.visionSubsystem.isTargetVisible()
         && RobotContainer.visionPoseCorrection
         && m_robotContainer.driveSubsystem.getCurrentSpeeds().vxMetersPerSecond
-            <= Constants.VisionConstants.CORECTION_SPEED_LIMIT.in(MetersPerSecond)) {
+            <= Constants.VisionConstants.VISION_CORRECTION_LINEAR_SPEED_LIMIT.in(MetersPerSecond)
+        && RadiansPerSecond.of(
+                    m_robotContainer.driveSubsystem.getCurrentSpeeds().omegaRadiansPerSecond)
+                .in(DegreesPerSecond)
+            <= Constants.VisionConstants.VISION_CORRECTION_ROTATIONAL_SPEED_LIMIT.in(
+                DegreesPerSecond)) {
       m_robotContainer.driveSubsystem.resetOdometry(
           m_robotContainer.visionSubsystem.getGlobalPosefromReefAprilTag(
               m_robotContainer.visionSubsystem.getTargetID()));

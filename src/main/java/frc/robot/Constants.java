@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -146,7 +147,9 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final String CAMERA_NAME = "kitbot-limelight";
-    public static final LinearVelocity CORECTION_SPEED_LIMIT = MetersPerSecond.of(0.5);
+    public static final LinearVelocity VISION_CORRECTION_LINEAR_SPEED_LIMIT = MetersPerSecond.of(2);
+    public static final AngularVelocity VISION_CORRECTION_ROTATIONAL_SPEED_LIMIT =
+        DegreesPerSecond.of(30);
 
     public static class Pipelines {
       public static final int APRILTAG = 0;
