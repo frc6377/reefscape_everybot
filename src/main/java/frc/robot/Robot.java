@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -69,6 +71,14 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    if (m_robotContainer.visionSubsystem.isTargetVisible()
+        && RobotContainer.visionPoseCorrection
+        && m_robotContainer.driveSubsystem.getCurrentSpeeds().vxMetersPerSecond
+            <= Constants.VisionConstants.CORECTION_SPEED_LIMIT.in(MetersPerSecond)) {
+      m_robotContainer.driveSubsystem.resetOdometry(
+          m_robotContainer.visionSubsystem.getGlobalPosefromReefAprilTag(
+              m_robotContainer.visionSubsystem.getTargetID()));
+    }
   }
 
   @Override

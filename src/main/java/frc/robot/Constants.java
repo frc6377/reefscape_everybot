@@ -14,9 +14,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
@@ -28,6 +25,8 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -145,19 +144,25 @@ public final class Constants {
     }
   }
 
-  public static class VisionConstants{
+  public static class VisionConstants {
     public static final String CAMERA_NAME = "kitbot-limelight";
-    public static final int OBJECT_DETECTION_PIPELINE = 0;
-    public static final int APRILTAG_PIPELINE = 1;
+    public static final LinearVelocity CORECTION_SPEED_LIMIT = MetersPerSecond.of(0.5);
 
-    public static Map<Integer, Pose2d> REEF_APRILTAG_LOCATIONS = new HashMap<>();
+    public static class Pipelines {
+      public static final int APRILTAG = 0;
+      public static final int OBJECT_DETECTION = 1;
+    }
+
+    // FIXME REEF_APRILTAG_LOCATIONS is not set up yet
+    public static Map<Double, Pose2d> REEF_APRILTAG_LOCATIONS = new HashMap<>();
+
     static {
-      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-      REEF_APRILTAG_LOCATIONS.put(0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0.0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0.0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0.0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0.0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0.0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      REEF_APRILTAG_LOCATIONS.put(0.0, new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     }
   }
 }

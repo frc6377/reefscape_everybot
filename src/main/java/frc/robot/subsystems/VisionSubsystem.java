@@ -4,47 +4,81 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
+import org.littletonrobotics.junction.Logger;
 import utilities.LimelightHelpers;
 
-//README This is made only for apriltags not object detection yet
+// README This is made only for apriltags not object detection yet
 
 public class VisionSubsystem extends SubsystemBase {
 
-  public static class Pipelines {
-    public static final int APRILTAG = VisionConstants.APRILTAG_PIPELINE;
-    public static final int OBJECT_DETECTION = VisionConstants.OBJECT_DETECTION_PIPELINE;
-  }
-
-  
   public VisionSubsystem() {}
 
-  public static void switchPipeline(int pipeline) {
+  public void switchPipeline(int pipeline) {
     LimelightHelpers.setPipelineIndex(VisionConstants.CAMERA_NAME, pipeline);
   }
 
-  public static void switchPipeline(Pipelines pipeline) {
+  public void switchPipeline(VisionConstants.Pipelines pipeline) {
     switchPipeline(pipeline);
   }
 
-  public static void getCurrentPipeline() {
+  public void getCurrentPipeline() {
     LimelightHelpers.getCurrentPipelineIndex(VisionConstants.CAMERA_NAME);
   }
 
-  public static Pose2d getTargetRelativeRobotPose() {
-    double[] poseList  = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.CAMERA_NAME);
-    return new Pose2d(poseList[0], poseList[1], Rotation2d.fromDegrees(poseList[4]));
+  public Pose2d getTargetRelativeRobotPose() {
+    if (LimelightHelpers.getTV(VisionConstants.CAMERA_NAME)) {
+      double[] poseList = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.CAMERA_NAME);
+      return new Pose2d(poseList[0], poseList[1], Rotation2d.fromDegrees(poseList[4]));
+    } else {
+      return null;
+    }
   }
 
-  public static Pose2d getRobotRelativeTargetPose(int pipeline) {
-    double[] poseList  = LimelightHelpers.getTargetPose_RobotSpace(VisionConstants.CAMERA_NAME);
-    return new Pose2d(poseList[0], poseList[1], Rotation2d.fromDegrees(poseList[4]));
+  public Pose2d getRobotRelativeTargetPose() {
+    if (LimelightHelpers.getTV(VisionConstants.CAMERA_NAME)) {
+      double[] poseList = LimelightHelpers.getTargetPose_RobotSpace(VisionConstants.CAMERA_NAME);
+      return new Pose2d(poseList[0], poseList[1], Rotation2d.fromDegrees(poseList[4]));
+    } else {
+      return null;
+    }
   }
 
+  public double getTargetID() {
+    if (LimelightHelpers.getTV(VisionConstants.CAMERA_NAME)) {
+      return LimelightHelpers.getFiducialID(VisionConstants.CAMERA_NAME);
+    } else {
+      return -1;
+    }
+  }
 
+  public boolean isTargetVisible() {
+    return LimelightHelpers.getTV(VisionConstants.CAMERA_NAME);
+  }
+
+  public Pose2d getGlobalPosefromReefAprilTag(double apriltagID) {
+    if (VisionConstants.REEF_APRILTAG_LOCATIONS.keySet().contains(apriltagID)) {
+      Pose2d apriltagPose = VisionConstants.REEF_APRILTAG_LOCATIONS.get(apriltagID);
+      Pose2d robotPose = getTargetRelativeRobotPose();
+      Pose2d globalPose =
+          new Pose2d(
+              apriltagPose.getX() + robotPose.getX(),
+              apriltagPose.getY() + robotPose.getY(),
+              apriltagPose.getRotation().plus(robotPose.getRotation()));
+      return globalPose;
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public void periodic() {
+    Logger.recordOutput("Vision/TargetRelativeRobotPose", getTargetRelativeRobotPose());
+    Logger.recordOutput("Vision/RobotRelativeTargetPose", getRobotRelativeTargetPose());
+    Logger.recordOutput("Vision/TargetVisible", isTargetVisible());
+    Logger.recordOutput("Vision/TargetID", getTargetID());
+  }
 }

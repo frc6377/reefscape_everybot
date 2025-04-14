@@ -20,6 +20,7 @@ import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -37,6 +38,7 @@ public class RobotContainer {
   public final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
   public final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
+  public final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -47,6 +49,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<Command> hardAutoChooser;
 
+  public static boolean visionPoseCorrection = false;
   public static boolean coralMode = true;
   public boolean usingPP = false;
 
@@ -54,12 +57,14 @@ public class RobotContainer {
   public RobotContainer() {
     if (AutoBuilder.isConfigured()) {
       autoChooser = new LoggedDashboardChooser<>("PP Auto Choices", AutoBuilder.buildAutoChooser());
+      hardAutoChooser = null;
+      addPPAutoCommands();
     } else {
       autoChooser = null;
+      hardAutoChooser = new SendableChooser<>();
+      addHardAutos();
     }
 
-    hardAutoChooser = new SendableChooser<>();
-    addHardAutos();
     configureBindings();
   }
 
@@ -72,14 +77,6 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  public void PPAutoCommands() {
-    HashMap<String, Command> autonCommands = new HashMap<String, Command>();
-
-    autonCommands.put("ScoreCoralL1", coralScorerSubsystem.ejectCommand());
-
-    NamedCommands.registerCommands(autonCommands);
-  }
-
   public void configureBindings() {
 
     // Coral Mode Buttons
@@ -118,6 +115,9 @@ public class RobotContainer {
                 () -> {
                   coralMode = !coralMode;
                 }));
+
+    driverController.b().onTrue(toggleVisionPoseCorrection());
+
     Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
@@ -134,6 +134,7 @@ public class RobotContainer {
             Commands.runOnce(
                 () ->
                     driveSubsystem.goToRelativePose(new Pose2d(0.5, 0.5, new Rotation2d(45.00)))));
+
     driverController.start().onTrue(Commands.run(() -> driveSubsystem.zeroPosition()));
   }
 
@@ -142,14 +143,28 @@ public class RobotContainer {
   }
 
   private void addHardAutos() {
-    hardAutoChooser.addOption("Example Auto", Autos.exampleAuto(driveSubsystem));
-    hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
-    hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem));
-    SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
+    if (hardAutoChooser != null) {
+      hardAutoChooser.addOption("Example Auto", Autos.exampleAuto(driveSubsystem));
+      hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
+      hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem));
+      SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
+    }
+  }
+
+  private void addPPAutoCommands() {
+    HashMap<String, Command> autonCommands = new HashMap<String, Command>();
+
+    autonCommands.put("ScoreCoralL1", coralScorerSubsystem.ejectCommand());
+
+    NamedCommands.registerCommands(autonCommands);
   }
 
   public static Command switchBotMode(boolean coralModebool) {
     return Commands.runOnce(() -> coralMode = coralModebool);
+  }
+
+  public static Command toggleVisionPoseCorrection() {
+    return Commands.runOnce(() -> visionPoseCorrection = !visionPoseCorrection);
   }
 
   /**
@@ -160,21 +175,24 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     if (usingPP) {
       if (autoChooser != null) {
-        return autoChooser.get(); // Use AutoBuilder if configured
+        return autoChooser.get();
       } else {
         DriverStation.reportError(
             "AutoBuilder is not configured. Falling back to hard autos.", false);
         return Commands.none();
       }
-    } else {
+    } else if (hardAutoChooser != null) {
       Command selectedCommand = hardAutoChooser.getSelected();
       if (selectedCommand != null) {
         return selectedCommand;
       } else {
-        DriverStation.reportError(
-            "No hard auto selected. Defaulting to a 'do nothing' command.", true);
+        DriverStation.reportError("No hard auto selected. Defaulting to Nothing Command", true);
         return Commands.none();
       }
+    } else {
+      DriverStation.reportError(
+          "No AutoChooser has been set up. Defaulting to Nothing Command", true);
+      return Commands.none();
     }
   }
 }
