@@ -4,11 +4,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.CANdleSignalingSubsystem;
+import frc.robot.subsystems.CANdleSignalingSubsystem.LightState;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.NoSuchElementException;
@@ -36,7 +40,7 @@ public class Robot extends LoggedRobot {
       try {
         /*
           findReplayLog() prompts the user for a log file path to replay, requiring input from the
-          user on the terminal.
+          user on the terminal.1
           This is a undesired interaction, so using setIn() to provide an empty line to the prompt.
 
           findReplayLog() looks for the log file in AdvantageKit first, so this doesn't interrupt
@@ -64,6 +68,50 @@ public class Robot extends LoggedRobot {
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
     m_robotContainer = new RobotContainer();
+
+    CANdleSignalingSubsystem signaling = m_robotContainer.signalingSubsystem;
+
+    CommandScheduler.getInstance()
+        .onCommandInitialize(
+            command -> {
+              if (command.getName().equals("intakeCoralCommand")
+                  || command.getName().equals("ejectCoralCommand")) {
+                signaling.setState(LightState.CORAL_ACTION);
+              } else if (command.getName().equals("intakeAlgaeCommand")
+                  || command.getName().equals("ejectAlgaeCommand")) {
+                signaling.setState(LightState.ALGAE_ACTION);
+              }
+            });
+
+    CommandScheduler.getInstance()
+        .onCommandFinish(
+            command -> {
+              if (!DriverStation.isDisabled()) {
+                if (DriverStation.isAutonomous()) {
+                  signaling.setState(LightState.AUTON_IDLE);
+                  return;
+                } else if (RobotContainer.coralMode) {
+                  signaling.setState(LightState.CORAL_MODE);
+                } else if (!RobotContainer.coralMode) {
+                  signaling.setState(LightState.ALGAE_MODE);
+                }
+              }
+            });
+
+    CommandScheduler.getInstance()
+        .onCommandInterrupt(
+            command -> {
+              if (!DriverStation.isDisabled()) {
+                if (DriverStation.isAutonomous()) {
+                  signaling.setState(LightState.AUTON_IDLE);
+                  return;
+                } else if (RobotContainer.coralMode) {
+                  signaling.setState(LightState.CORAL_MODE);
+                } else if (!RobotContainer.coralMode) {
+                  signaling.setState(LightState.ALGAE_MODE);
+                }
+              }
+            });
   }
 
   @Override
@@ -72,7 +120,10 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    CANdleSignalingSubsystem signaling = m_robotContainer.signalingSubsystem;
+    signaling.setState(LightState.DISABLED);
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -83,14 +134,21 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    CANdleSignalingSubsystem signaling = m_robotContainer.signalingSubsystem;
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
+      signaling.setState(LightState.AUTON_IDLE);
     }
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    if (m_autonomousCommand != null && m_autonomousCommand.isFinished()) {
+      CANdleSignalingSubsystem signaling = m_robotContainer.signalingSubsystem;
+      signaling.setState(LightState.AUTON_FINISH);
+    }
+  }
 
   @Override
   public void autonomousExit() {}
@@ -102,6 +160,13 @@ public class Robot extends LoggedRobot {
     }
     m_robotContainer.algaeScorerSubsystem.setIntakeAngleCommand(
         Constants.AlgaeScorerConstants.PIVOT_STOW_ANGLE);
+
+    CANdleSignalingSubsystem signaling = m_robotContainer.signalingSubsystem;
+    if (RobotContainer.coralMode) {
+      signaling.setState(LightState.CORAL_MODE);
+    } else if (!RobotContainer.coralMode) {
+      signaling.setState(LightState.ALGAE_MODE);
+    }
   }
 
   @Override
@@ -120,4 +185,14 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void testExit() {}
+
+  public String[] getScheduledCommands() {
+    NetworkTable table =
+        NetworkTableInstance.getDefault().getTable("SmartDashboard").getSubTable("Scheduler");
+    if (table != null) {
+      String[] scheduledCommands = table.getEntry("Names").getStringArray(new String[0]);
+      return scheduledCommands;
+    }
+    return null;
+  }
 }

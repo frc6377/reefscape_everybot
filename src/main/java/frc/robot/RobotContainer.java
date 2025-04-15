@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.led.CANdle;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,12 +16,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.SignalingConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANAlgaeManipulatorSubsystem;
 import frc.robot.subsystems.CANCoralScorerSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANdleSignalingSubsystem;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -40,7 +39,7 @@ public class RobotContainer {
   public final CANCoralScorerSubsystem coralScorerSubsystem = new CANCoralScorerSubsystem();
   public final CANAlgaeManipulatorSubsystem algaeScorerSubsystem =
       new CANAlgaeManipulatorSubsystem();
-  public final CANdleSignalingSubsystem signalSubsystem = new CANdleSignalingSubsystem();
+  public final CANdleSignalingSubsystem signalingSubsystem = new CANdleSignalingSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -56,15 +55,15 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    signalSubsystem.setLights(0);
-    if (AutoBuilder.isConfigured()) {
+    if (AutoBuilder.isConfigured() && usingPP) {
       autoChooser = new LoggedDashboardChooser<>("PP Auto Choices", AutoBuilder.buildAutoChooser());
+      hardAutoChooser = null;
     } else {
       autoChooser = null;
+      hardAutoChooser = new SendableChooser<>();
+      initializeHardAutos();
     }
 
-    hardAutoChooser = new SendableChooser<>();
-    addHardAutos();
     configureBindings();
   }
 
@@ -91,11 +90,11 @@ public class RobotContainer {
     driverController
         .leftTrigger()
         .and(() -> coralMode)
-        .whileTrue(Commands.sequence(signalSubsystem.setLights(3), coralScorerSubsystem.intakeCommand(), signalSubsystem.setLights(2)));
+        .whileTrue(coralScorerSubsystem.intakeCommand());
     driverController
         .rightTrigger()
         .and(() -> coralMode)
-        .whileTrue(Commands.sequence(signalSubsystem.setLights(3), coralScorerSubsystem.ejectCommand(), signalSubsystem.setLights(2)));
+        .whileTrue(coralScorerSubsystem.ejectCommand());
     driverController
         .leftBumper()
         .and(() -> coralMode)
@@ -105,11 +104,11 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .and(() -> !coralMode)
-        .whileTrue(Commands.sequence(signalSubsystem.setLights(5), algaeScorerSubsystem.intakeAlgaeCommand(), signalSubsystem.setLights(4)));
+        .whileTrue(algaeScorerSubsystem.intakeAlgaeCommand());
     driverController
         .leftTrigger()
         .and(() -> !coralMode)
-        .whileTrue(Commands.sequence(signalSubsystem.setLights(5), algaeScorerSubsystem.outakeAlgaeCommand(), signalSubsystem.setLights(4)));
+        .whileTrue(algaeScorerSubsystem.outakeAlgaeCommand());
     driverController
         .rightBumper()
         .and(() -> !coralMode)
@@ -121,9 +120,10 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  coralMode = !coralMode;
-                  signalSubsystem.setLights(coralMode ? 2 : 4);
+                  coralMode = !coralMode; // Toggle coralMode
+                  Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
                 }));
+
     Logger.recordOutput("Mode/Score Mode", coralMode ? "Coral Mode" : "Algae Mode");
     driveSubsystem.setDefaultCommand(
         driveSubsystem.arcadeDrive(
@@ -147,14 +147,40 @@ public class RobotContainer {
     return intensity * Math.pow(input.getAsDouble(), 3) + (1 - intensity) * input.getAsDouble();
   }
 
-  private void addHardAutos() {
-    hardAutoChooser.addOption("Example Auto", Autos.exampleAuto(driveSubsystem));
-    hardAutoChooser.addOption("Rotate Auto", Autos.rotateAuto(driveSubsystem));
-    hardAutoChooser.addOption("Forward Auto", Autos.forwardAuto(driveSubsystem, signalSubsystem));
-    SmartDashboard.putData("Hard Auto Chooser", hardAutoChooser);
+  private void initializeHardAutos() {
+    if (hardAutoChooser != null) {
+      for (Method method : Autos.class.getDeclaredMethods()) {
+        if (method.getReturnType() == Command.class) {
+          String name = method.getName();
+          try {
+            hardAutoChooser.addOption(
+                beautifyName(name), (Command) method.invoke(null, driveSubsystem));
+          } catch (Exception e) {
+            DriverStation.reportError("Failed to add auto: " + name, true);
+          }
+        }
+      }
+      SmartDashboard.putData("HARD AUTO CHOOSER", hardAutoChooser);
+    }
   }
 
-  public static Command switchBotMode(boolean coralModebool){
+  private String beautifyName(String camelCase) {
+    String spaced =
+        camelCase
+            .replaceAll("([a-z])([A-Z])", "$1 $2")
+            .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2")
+            .replaceAll("Auto$", "")
+            .trim();
+
+    return capitalize(spaced);
+  }
+
+  private String capitalize(String input) {
+    if (input == null || input.isEmpty()) return input;
+    return input.substring(0, 1).toUpperCase() + input.substring(1);
+  }
+
+  public static Command switchBotMode(boolean coralModebool) {
     return Commands.runOnce(() -> coralMode = coralModebool);
   }
 

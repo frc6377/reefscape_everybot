@@ -196,11 +196,13 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
 
   public Command outakeAlgaeCommand() {
     return runEnd(
-        () -> setRoller(AlgaeScorerConstants.OUTAKE_TAKE_SPEED_PERCENT), () -> setRoller(0.0));
+            () -> setRoller(AlgaeScorerConstants.OUTAKE_TAKE_SPEED_PERCENT), () -> setRoller(0.0))
+        .withName("outakeAlgaeCommand");
   }
 
   public Command intakeAlgaeCommand() {
-    return runEnd(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT), () -> setRoller(0.0));
+    return runEnd(() -> setRoller(AlgaeScorerConstants.INTAKE_SPEED_PERCENT), () -> setRoller(0.0))
+        .withName("intakeAlgaeCommand");
   }
 
   public Command stopRoller() {

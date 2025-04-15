@@ -300,11 +300,11 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   // Telemetry Commands
   public Command arcadeDrive(DoubleSupplier forward, DoubleSupplier rotation) {
-    return run(
-        () -> {
+    return run(() -> {
           diffDrive.arcadeDrive(forward.getAsDouble(), rotation.getAsDouble());
           diffDrive.feed();
-        });
+        })
+        .withName("ArcadeDriveCommand");
   }
 
   public Command coralDrivetrain() {

@@ -54,12 +54,13 @@ public class CANCoralScorerSubsystem extends SubsystemBase {
 
   // Scoring method
   public Command ejectCommand() {
-    return runRollerCommand(() -> intakeSpeed);
+    return runRollerCommand(() -> intakeSpeed).withName("ejectCoralCommand");
   }
 
   // Intake method
   public Command intakeCommand() {
-    return runRollerCommand(() -> CoralScorerConstants.ROLLER_INTAKE_PERCENT);
+    return runRollerCommand(() -> CoralScorerConstants.ROLLER_INTAKE_PERCENT)
+        .withName("intakeCoralCommand");
   }
 
   public Command stopRoller() {
