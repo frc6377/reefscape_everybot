@@ -2,13 +2,19 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.led.*;
 import com.ctre.phoenix.led.TwinkleAnimation.TwinklePercent;
+import com.ctre.phoenix.led.TwinkleOffAnimation.TwinkleOffPercent;
+import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.SignalingConstants;
 import frc.utils.RGB;
 import org.littletonrobotics.junction.Logger;
+import java.util.*;
 
 public class CANdleSignalingSubsystem extends SubsystemBase {
 
@@ -24,6 +30,18 @@ public class CANdleSignalingSubsystem extends SubsystemBase {
     REEF,
     DISABLED
   };
+
+  public enum AnimationType {
+    FLOW,
+    FIRE,
+    LARSON,
+    RAINBOW,
+    RGB_FADE,
+    FADE,
+    STROBE,
+    TWINKLE,
+    TWINKLE_OFF
+  }
 
   public LightState currentState = LightState.DISABLED;
 
@@ -44,6 +62,8 @@ public class CANdleSignalingSubsystem extends SubsystemBase {
         return setLights(5);
       case REEF:
         return setLights(6);
+    case DISABLED:
+        return setLights(7);
       default:
         return Commands.none();
     }
@@ -52,7 +72,7 @@ public class CANdleSignalingSubsystem extends SubsystemBase {
   private Command setLights(int id) {
     switch (id) {
       case 0:
-        return new InstantCommand(() -> setFullStrip(RGB.RED, false), this);
+        return new InstantCommand(() -> setFullStrip(RGB.WHITE, false));
       case 1:
         return new InstantCommand(() -> setFullStrip(RGB.YELLOW, false));
       case 2:
@@ -68,33 +88,85 @@ public class CANdleSignalingSubsystem extends SubsystemBase {
       case 7:
         return new InstantCommand(
             () ->
-                setAnimation(
-                    new TwinkleAnimation(
-                        RGB.HOWDY_BLUE.red,
-                        RGB.HOWDY_BLUE.blue,
-                        RGB.HOWDY_BLUE.green,
-                        0,
-                        0.5,
-                        SignalingConstants.NUMBER_OF_LEDS,
-                        TwinklePercent.Percent42)));
+                setDisabledAnimation()
+        );
       default:
         return Commands.none();
+    }
+  }
+
+  private Command setDisabledAnimation() {
+    return new InstantCommand(
+        () -> {
+          setAnimation(AnimationType.TWINKLE, getAllianceColor(), 1.0);
+    });
+  }
+
+  public Command setRandomAnimation() {
+    if (currentState == LightState.DISABLED) {
+      return new InstantCommand(
+        () -> {
+            AnimationType[] animations = AnimationType.values();
+            AnimationType randomAnimation = animations[(int) (Math.random() * animations.length)];
+            setAnimation(randomAnimation, getAllianceColor(), 1.0);
+        });
+    } else {
+      return Commands.none();
+    }
+  }
+
+  private RGB getAllianceColor() {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+      return RGB.RED;
+    } else {
+      return RGB.HOWDY_BLUE;
     }
   }
 
   private void setFullStrip(final RGB rgb, boolean flash) {
     clearAnimation();
     if (flash) {
-      setAnimation(
-          new StrobeAnimation(
-              rgb.red, rgb.green, rgb.blue, 0, 0.5, SignalingConstants.NUMBER_OF_LEDS));
+      setAnimation(AnimationType.STROBE, rgb, 0.5);
     } else {
       setSection(rgb, 8, SignalingConstants.NUMBER_OF_LEDS);
     }
   }
 
-  private void setAnimation(Animation animation) {
-    candle.animate(animation, 0);
+  private void setAnimation(AnimationType animation, RGB rgb, double speed) {
+    clearAnimation();
+    switch (animation) {
+        case FLOW:
+            candle.animate(new ColorFlowAnimation(rgb.red, rgb.green, rgb.blue, 0, speed, SignalingConstants.NUMBER_OF_LEDS, Direction.Forward));
+            break;
+        case FIRE:
+            candle.animate(new FireAnimation(speed, 0.5, SignalingConstants.NUMBER_OF_LEDS, 0.7, 0.3));
+            break;
+        case LARSON:
+            candle.animate(new LarsonAnimation(rgb.red, rgb.green, rgb.blue, 0, speed, SignalingConstants.NUMBER_OF_LEDS, BounceMode.Front, 12));
+            break;
+        case RAINBOW:
+            candle.animate(new RainbowAnimation(1, speed, SignalingConstants.NUMBER_OF_LEDS));
+            break;
+        case RGB_FADE:
+            candle.animate(new RgbFadeAnimation(1, speed, SignalingConstants.NUMBER_OF_LEDS));
+            break;
+        case FADE:
+            candle.animate(new SingleFadeAnimation(rgb.red, rgb.green, rgb.blue, 0, speed, SignalingConstants.NUMBER_OF_LEDS));
+            break;
+        case STROBE:
+            candle.animate(new StrobeAnimation(rgb.red, rgb.green, rgb.blue, 0, speed, SignalingConstants.NUMBER_OF_LEDS));
+            break;
+        case TWINKLE:
+            candle.animate(new TwinkleAnimation(rgb.red, rgb.green, rgb.blue, 0, speed, SignalingConstants.NUMBER_OF_LEDS, TwinklePercent.Percent42));
+            break;
+        case TWINKLE_OFF:
+            candle.animate(new TwinkleOffAnimation(rgb.red, rgb.green, rgb.blue, 0, speed, SignalingConstants.NUMBER_OF_LEDS, TwinkleOffPercent.Percent42));
+            break;
+        default:
+            clearAnimation();
+            break;
+    }
   }
 
   public void clearAnimation() {

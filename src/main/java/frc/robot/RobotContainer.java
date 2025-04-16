@@ -141,6 +141,9 @@ public class RobotContainer {
                 () ->
                     driveSubsystem.goToRelativePose(new Pose2d(0.5, 0.5, new Rotation2d(45.00)))));
     driverController.start().onTrue(Commands.run(() -> driveSubsystem.zeroPosition()));
+
+    // Signaling Buttons
+    driverController.y().onTrue(Commands.runOnce(() -> signalingSubsystem.setRandomAnimation()));
   }
 
   public double cubicCurve(DoubleSupplier input, double intensity) {
