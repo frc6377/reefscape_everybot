@@ -50,7 +50,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<Command> hardAutoChooser;
 
-  public static boolean coralMode = true;
+  private static boolean coralMode = true;
   public boolean usingPP = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -185,6 +185,10 @@ public class RobotContainer {
 
   public static Command switchBotMode(boolean coralModebool) {
     return Commands.runOnce(() -> coralMode = coralModebool);
+  }
+
+  public static boolean getBotMode() {
+    return coralMode;
   }
 
   /**

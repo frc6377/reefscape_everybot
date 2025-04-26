@@ -90,9 +90,9 @@ public class Robot extends LoggedRobot {
                 if (DriverStation.isAutonomous()) {
                   signaling.setState(LightState.AUTON_IDLE);
                   return;
-                } else if (RobotContainer.coralMode) {
+                } else if (RobotContainer.getBotMode()) {
                   signaling.setState(LightState.CORAL_MODE);
-                } else if (!RobotContainer.coralMode) {
+                } else if (!RobotContainer.getBotMode()) {
                   signaling.setState(LightState.ALGAE_MODE);
                 }
               }
@@ -105,9 +105,9 @@ public class Robot extends LoggedRobot {
                 if (DriverStation.isAutonomous()) {
                   signaling.setState(LightState.AUTON_IDLE);
                   return;
-                } else if (RobotContainer.coralMode) {
+                } else if (RobotContainer.getBotMode()) {
                   signaling.setState(LightState.CORAL_MODE);
-                } else if (!RobotContainer.coralMode) {
+                } else if (!RobotContainer.getBotMode()) {
                   signaling.setState(LightState.ALGAE_MODE);
                 }
               }
@@ -158,13 +158,13 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    m_robotContainer.algaeScorerSubsystem.setIntakeAngleCommand(
-        Constants.AlgaeScorerConstants.PIVOT_STOW_ANGLE);
+    // m_robotContainer.algaeScorerSubsystem.setIntakeAngleCommand(
+    //     Constants.AlgaeScorerConstants.PIVOT_STOW_ANGLE);
 
     CANdleSignalingSubsystem signaling = m_robotContainer.signalingSubsystem;
-    if (RobotContainer.coralMode) {
+    if (RobotContainer.getBotMode()) {
       signaling.setState(LightState.CORAL_MODE);
-    } else if (!RobotContainer.coralMode) {
+    } else if (!RobotContainer.getBotMode()) {
       signaling.setState(LightState.ALGAE_MODE);
     }
   }

@@ -142,9 +142,9 @@ public final class Constants {
 
   public static class SignalingConstants {
     public static final double RUMBLE_STRENGTH = 0.5;
-    public static final int NUMBER_OF_LEDS = 60;
+    public static final int NUMBER_OF_LEDS = 80;
     public static final double LED_BRIGHTNESS = 0.5;
     public static final double PATTERN_SPEED = 0.02;
-    public static final int kCANdleID = 19;
+    public static final int kCANdleID = 9;
   }
 }
