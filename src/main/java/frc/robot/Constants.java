@@ -6,7 +6,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -65,5 +67,16 @@ public final class Constants {
   public static final class OperatorConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
     public static final int OPERATOR_CONTROLLER_PORT = 1;
+  }
+
+  public static final class ArmSimConstants {
+    public static final int kArmSimGearing = 100;
+    public static final DCMotor kArmSimGearbox = DCMotor.getNEO(1);
+    public static final Distance kArmSimLength = Inch.of(10);
+    public static final Mass kArmSimMass = Pounds.of(10);
+    public static final double kArmSimMOI =
+        SingleJointedArmSim.estimateMOI(kArmSimLength.in(Meters), kArmSimMass.in(Kilograms));
+    public static final Angle kStartAngle = Degree.of(0);
+    public static final Angle kEndAngle = Degree.of(90);
   }
 }

@@ -7,10 +7,12 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
 import java.util.HashMap;
@@ -26,6 +28,8 @@ public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
+
+  private final ArmSubsystem armSubsystem = new ArmSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -80,6 +84,24 @@ public class RobotContainer {
             () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
 
     driverController.x().onTrue(driveSubsystem.zeroOdometry());
+
+    // driverController
+    //     .rightTrigger()
+    //     .whileTrue(Commands.run(() -> armSubsystem.simulateVoltage(12.0), armSubsystem));
+    // driverController
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.run(
+    //             () -> {
+    //               System.out.println("Right trigger held");
+    //               armSubsystem.simulateVoltage(12.0);
+    //             },
+    //             armSubsystem));
+    driverController.rightTrigger()
+        .whileTrue(Commands.run(() -> armSubsystem.simulateVoltage(-20.0), armSubsystem));
+    
+    driverController.leftTrigger()
+        .whileTrue(Commands.run(() -> armSubsystem.simulateVoltage(20.0), armSubsystem));            
   }
 
   /**

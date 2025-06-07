@@ -71,6 +71,10 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
   }
 
+  public void simulationPeriodic() {
+    CommandScheduler.getInstance().run();
+  }
+
   @Override
   public void disabledInit() {}
 
