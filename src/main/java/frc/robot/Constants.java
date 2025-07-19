@@ -112,10 +112,10 @@ public final class Constants {
 
     public static final int ENCODER_RESOLUTION = 2048;
 
-    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(80);
-    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(28);
+    public static final Angle PIVOT_STOW_ANGLE = Degrees.of(0);
+    public static final Angle PIVOT_INTAKE_ANGLE = Degrees.of(-55);
 
-    public static double INTAKE_SPEED_PERCENT = 0.3;
+    public static double INTAKE_SPEED_PERCENT = 0.4;
     public static double OUTAKE_TAKE_SPEED_PERCENT = -0.4;
 
     public static final Mass ARM_MASS = Pounds.of(7.2172536);
@@ -128,14 +128,14 @@ public final class Constants {
     public static final Angle PIVOT_ANGLE_DEADBAND = Degrees.of(2);
 
     public final class PivotPID {
-      public static final double p = 0.015;
-      public static final double i = 0.00;
+      public static final double p = 0.01;
+      public static final double i = 0.005;
       public static final double d = 0.00;
     }
 
     public final class PivotFeedForward {
-      public static final double kg = 0.0001;
-      public static final double kv = 0.0;
+      public static final double kg = 0.5;
+      public static final double kv = 0.03;
       public static final double ks = 0.0;
     }
   }

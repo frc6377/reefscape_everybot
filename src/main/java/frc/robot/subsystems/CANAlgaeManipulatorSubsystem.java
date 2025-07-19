@@ -88,6 +88,7 @@ public class CANAlgaeManipulatorSubsystem extends SubsystemBase {
             AlgaeScorerConstants.PIVOT_ENCODER_A, AlgaeScorerConstants.PIVOT_ENCODER_B, false);
 
     pivotEncoder.setDistancePerPulse(360.0 / AlgaeScorerConstants.ENCODER_RESOLUTION);
+    pivotEncoder.reset();
 
     pivotEncoderSim = new EncoderSim(pivotEncoder);
 
